@@ -7,11 +7,20 @@
     "operations": [
       {
         "operation": "enum_to_enum",
-        "mapping": {
-          "pos": "positive",
-          "neg": "negative",
-          "UNK": null
-        },
+        "mapping": [
+          {
+            "from": "pos",
+            "to": "positive"
+          },
+          {
+            "from": "neg",
+            "to": "negative"
+          },
+          {
+            "from": "UNK",
+            "to": null
+          }
+        ],
         "strict": false,
         "default": "unexpected"
       }
@@ -43,9 +52,12 @@
     "operations": [
       {
         "operation": "missing_code",
-        "codes": {
-          "-999": "not_measured"
-        }
+        "codes": [
+          {
+            "code": -999,
+            "label": "not_measured"
+          }
+        ]
       },
       {
         "operation": "scale",

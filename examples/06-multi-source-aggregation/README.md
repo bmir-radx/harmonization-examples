@@ -8,8 +8,8 @@ inputs into one target — plus aggregating many values packed into one column.
 - `reduce` — N inputs → 1 output. Reductions: `sum`, `any`, `none`, `all`,
   `one-hot` (index of the single set bit).
 - `parse_array` — parse a packed cell (delimited/JSON) into a list.
-- Combining `cast` + `enum_to_enum` to name a one-hot index (with the
-  JSON-stable string-key fix).
+- Feeding a one-hot integer index straight into `enum_to_enum` to name it —
+  the integer keys round-trip safely (no cast needed).
 
 ## How multi-source rules work
 
@@ -39,7 +39,7 @@ directly. Two things to know:
 | Sources | Target | Pipeline | Why |
 |---------|--------|----------|-----|
 | 3 `sym_*` flags | `symptom_count` | `reduce(sum)` | Independent (non-exclusive) flags → a count. `sum`, not `one-hot`, because more than one can be set. |
-| 3 `stat_*` flags | `triage_status` | `reduce(one-hot)` → `cast(text)` → `enum_to_enum` | Mutually exclusive flags → one label. Index 0/1/2 → `new`/`active`/`closed`. Zero/multiple bits → `None` → `ambiguous`. |
+| 3 `stat_*` flags | `triage_status` | `reduce(one-hot)` → `enum_to_enum` (int keys) | Mutually exclusive flags → one label. Index 0/1/2 → `new`/`active`/`closed`. Zero/multiple bits → `None` → `ambiguous`. |
 | `daily_scores` (one column) | `score_total` | `parse_array(\|, int)` → `reduce(sum)` | A single packed cell parsed to a list, then summed. |
 
 ### sum vs. one-hot

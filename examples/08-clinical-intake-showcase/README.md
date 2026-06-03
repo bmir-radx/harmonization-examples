@@ -2,8 +2,7 @@
 
 A realistic, end-to-end example. Where the tutorials isolate one idea each, this
 one harmonizes a messy intake CSV the way you'd actually have to, and focuses on
-the **decisions** — fail vs. coerce vs. default, many-to-one mapping, and
-keeping types consistent across the JSON serialization boundary.
+the **decisions** — fail vs. coerce vs. default, and many-to-one mapping.
 
 ## The data (and its messes)
 
@@ -30,7 +29,7 @@ columns.
 | `visit_code` | `visit_type` | `enum_to_enum(default="unmapped")` | **Coerce + flag.** `XX` → `"unmapped"` so the batch survives and the anomaly stays visible. |
 | `visit_date` | `visit_date_us` | `convert_date(%Y-%m-%d → %m/%d/%Y)` | **Fail fast.** A malformed date raises — a silent misparse is worse than a loud error for a clinical field. |
 | `height_in` | `height_cm` | `convert_units(inch→cm)` → `round(1)` | Convert at full precision, then round. |
-| `consent_research`, `consent_biobank`, `consent_none` | `consent_type` | `reduce(one-hot)` → `cast(text)` → `enum_to_enum(default="ambiguous")` | **Many-to-one**, with a serialization fix (below). |
+| `consent_research`, `consent_biobank`, `consent_none` | `consent_type` | `reduce(one-hot)` → `enum_to_enum(default="ambiguous", int keys)` | **Many-to-one**: collapse three flags to one label (below). |
 
 ### Contrast worth noting: fail vs. coerce
 
@@ -40,26 +39,28 @@ clinically meaningful, so we let `convert_date` fail fast on anything
 malformed. Harmonization isn't "always coerce" or "always fail" — it's choosing
 per field, and recording why (here, in each rule's `metadata.rationale`).
 
-### The many-to-one consent reduction (and a real gotcha)
+### The many-to-one consent reduction
 
 Three mutually exclusive one-hot flags collapse into one `consent_type`:
 
 1. `reduce(one-hot)` returns the index of the single set bit (`0`/`1`/`2`), or
    `None` if zero or multiple flags are set.
-2. `cast(integer → text)` turns the index into `"0"`/`"1"`/`"2"`.
-3. `enum_to_enum` names it, with `default="ambiguous"` for the `None` case.
+2. `enum_to_enum` names it (keyed by integers `0`/`1`/`2`), with
+   `default="ambiguous"` for the `None` case.
 
-**Why the cast?** `EnumToEnum` only restores *integer* keys from JSON when both
-keys and values are int-like. Our values are strings, so integer keys
-round-trip from `rules.json` as strings — and an integer index from `reduce`
-would then miss every key and fall through to the default. Casting the index to
-text and keying the map by `"0"/"1"/"2"` makes the lookup behave identically
-in-memory and after a `save()`/`load()`. Aligning types across the
-serialization boundary is itself part of harmonization discipline.
+The integer index feeds `enum_to_enum` directly — no cast in between. The map is
+keyed by integers, and `EnumToEnum` serializes its mapping as a list of
+`{"from", "to"}` entries, so those integer keys keep their type through a
+`save()`/`load()` and match the index identically in-memory and from
+`rules.json`. (See example 05 for why the entry-list form matters: a JSON object
+would have coerced the integer keys to strings and the index would have missed
+every key.)
 
-> This was caught by the golden-output check while building the example: the
-> first version produced `ambiguous` for every row. That's the value of the
-> self-checking `expected_output.csv`.
+> Earlier versions of these examples needed a `cast(integer → text)` here, to
+> dodge exactly that coercion — and the golden-output check caught it when the
+> first attempt produced `ambiguous` for every row. The serialization format now
+> preserves key types, so the cast is gone; the self-checking
+> `expected_output.csv` still guards the result.
 
 ## Running it
 

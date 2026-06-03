@@ -15,7 +15,7 @@ How a multi-source rule feeds the pipeline (verified behaviour):
   - Reduce(ONE-HOT) returns the index of the single set bit, or None if the
     inputs don't sum to exactly 1. Source ORDER defines the index.
 
-Primitives: reduce (sum / one-hot), parse_array, cast, enum_to_enum.
+Primitives: reduce (sum / one-hot), parse_array, enum_to_enum.
 
 Regenerate rules.json:
     ../../../harmonization-framework/venv/bin/python build_rules.py
@@ -24,7 +24,7 @@ Regenerate rules.json:
 from pathlib import Path
 
 from harmonization_framework import HarmonizationRule, RuleSet
-from harmonization_framework.primitives import Cast, EnumToEnum, ParseArray, Reduce
+from harmonization_framework.primitives import EnumToEnum, ParseArray, Reduce
 from harmonization_framework.primitives.reduce import Reduction
 
 
@@ -48,18 +48,18 @@ def build() -> RuleSet:
 
     # --- (stat_new, stat_active, stat_closed) -> triage_status --------------
     # Mutually exclusive status flags -> one categorical. ONE-HOT yields the
-    # index of the set bit (0/1/2); Cast to text then EnumToEnum names it. The
-    # cast-to-text + string keys handle the JSON round-trip (see example 05/08).
-    # Source order defines the index, so it must match the mapping keys.
+    # index of the set bit (0/1/2); EnumToEnum names it. The map is keyed by the
+    # integer index directly — the serialized form preserves integer keys, so no
+    # cast-to-text is needed. Source order defines the index, so it must match
+    # the mapping keys.
     rules.add_rule(
         HarmonizationRule(
             sources=["stat_new", "stat_active", "stat_closed"],
             target="triage_status",
             transformation=[
                 Reduce(Reduction.ONEHOT),
-                Cast("integer", "text"),
                 EnumToEnum(
-                    mapping={"0": "new", "1": "active", "2": "closed"},
+                    mapping={0: "new", 1: "active", 2: "closed"},
                     default="ambiguous",
                     strict=False,
                 ),
@@ -67,7 +67,8 @@ def build() -> RuleSet:
             metadata={
                 "rationale": "Mutually-exclusive status flags -> one label via "
                 "ONE-HOT. Source order = index order. Zero/multiple set bits "
-                "give None -> 'ambiguous'. Cast to text for JSON-stable keys."
+                "give None -> 'ambiguous'. The integer index feeds EnumToEnum "
+                "directly — keys are kept as ints through serialization."
             },
         )
     )

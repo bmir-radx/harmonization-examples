@@ -6,9 +6,10 @@ in depth.
 ## What it teaches
 
 - `enum_to_enum` — the lookup-table primitive.
-- `cast` — type coercion (int → text, int → boolean).
+- `cast` — type coercion (int → boolean).
 - **`strict=True` vs. `strict=False` + `default`**, side by side on one column.
-- The **integer-key serialization gotcha** and its fix.
+- That **integer-keyed maps round-trip safely** — you can key a map by integers
+  and map them to string labels with no special handling.
 
 ## The data
 
@@ -25,7 +26,7 @@ in depth.
 
 | Source | Target | Pipeline | Why |
 |--------|--------|----------|-----|
-| `satisfaction` | `satisfaction_label` | `cast(int→text)` → `enum_to_enum` (lenient) | Likert code → label. **Cast to text** so string keys survive JSON round-trip (see below). Lenient so an out-of-range code → `unknown`. |
+| `satisfaction` | `satisfaction_label` | `enum_to_enum` (lenient, **int keys**) | Likert code → label. The map is keyed by integers (no cast needed — see below). Lenient so an out-of-range code → `unknown`. |
 | `recommend` | `would_recommend` | `cast(int→boolean)` | A true binary needs no lookup — `cast` makes a native bool. |
 | `channel` | `channel_group` | `enum_to_enum` (lenient, default `other`) | Open-ended vocabulary; `kiosk` isn't mapped → `other`. |
 | `channel` | `channel_strict` | `enum_to_enum` (strict, all mapped) | **Contrast:** the fail-fast alternative for a hard-contract vocabulary. |
@@ -48,16 +49,23 @@ Choose **strict** when the code set is guaranteed and an unexpected value must
 halt the import; choose **lenient + default** when intake data drifts and you'd
 rather flag than fail.
 
-### The integer-key serialization gotcha
+### Integer keys round-trip safely
 
-`EnumToEnum.from_serialization` only restores **integer** keys from JSON when
-*both* keys and values are int-like. `satisfaction_label` maps integer codes to
-**string** labels, so after `save()`/`load()` the keys come back as strings
-(`"1"`, …). An integer input would then miss every key and fall to the default.
+`satisfaction_label` maps integer codes (`1`–`5`) to **string** labels, and the
+map is keyed by integers directly. That works in-memory *and* through
+`rules.json` because `EnumToEnum` serializes its mapping as a list of
+`{"from", "to"}` entries rather than a JSON object:
 
-**Fix:** `cast(int→text)` first, and key the map by `"1".."5"`. The lookup then
-behaves identically in-memory and through `rules.json`. (Example 08 applies the
-same fix to a one-hot reduction index.)
+```json
+"mapping": [{"from": 1, "to": "very_dissatisfied"}, ...]
+```
+
+A JSON *object* can only have string keys, so an object form would have turned
+`1` into `"1"` on save — and the integer input would then miss every key and
+fall through to the default. The entry-list keeps each key in a value position,
+so its type is preserved (`1` stays the integer `1`). No `cast(int→text)` is
+needed. (Examples 06 and 08 rely on the same property to feed a one-hot integer
+index straight into `enum_to_enum`.)
 
 ## Running it
 

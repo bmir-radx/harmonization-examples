@@ -21,11 +21,20 @@
     "operations": [
       {
         "operation": "enum_to_enum",
-        "mapping": {
-          "A": "active",
-          "I": "inactive",
-          "P": "pending"
-        },
+        "mapping": [
+          {
+            "from": "A",
+            "to": "active"
+          },
+          {
+            "from": "I",
+            "to": "inactive"
+          },
+          {
+            "from": "P",
+            "to": "pending"
+          }
+        ],
         "strict": false,
         "default": "unknown"
       }

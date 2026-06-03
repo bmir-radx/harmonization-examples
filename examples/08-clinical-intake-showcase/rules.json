@@ -47,11 +47,20 @@
     "operations": [
       {
         "operation": "enum_to_enum",
-        "mapping": {
-          "BL": "baseline",
-          "FU": "follow_up",
-          "SC": "screening"
-        },
+        "mapping": [
+          {
+            "from": "BL",
+            "to": "baseline"
+          },
+          {
+            "from": "FU",
+            "to": "follow_up"
+          },
+          {
+            "from": "SC",
+            "to": "screening"
+          }
+        ],
         "strict": false,
         "default": "unmapped"
       }
@@ -109,23 +118,27 @@
         "reduction": "one-hot"
       },
       {
-        "operation": "cast",
-        "source": "integer",
-        "target": "text"
-      },
-      {
         "operation": "enum_to_enum",
-        "mapping": {
-          "0": "research",
-          "1": "biobank",
-          "2": "declined"
-        },
+        "mapping": [
+          {
+            "from": 0,
+            "to": "research"
+          },
+          {
+            "from": 1,
+            "to": "biobank"
+          },
+          {
+            "from": 2,
+            "to": "declined"
+          }
+        ],
         "strict": false,
         "default": "ambiguous"
       }
     ],
     "metadata": {
-      "rationale": "Collapse 3 mutually-exclusive one-hot consent flags into one categorical; rows with zero/multiple flags become 'ambiguous' (one-hot -> None -> default) instead of a silently wrong label. Cast the index to text so the string keys survive JSON round-trip. Source order defines the index."
+      "rationale": "Collapse 3 mutually-exclusive one-hot consent flags into one categorical; rows with zero/multiple flags become 'ambiguous' (one-hot -> None -> default) instead of a silently wrong label. Integer index keys EnumToEnum directly (serialized form preserves key type). Source order = index."
     }
   }
 ]

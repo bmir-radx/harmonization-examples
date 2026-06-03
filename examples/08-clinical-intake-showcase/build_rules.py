@@ -24,7 +24,6 @@ from pathlib import Path
 
 from harmonization_framework import HarmonizationRule, RuleSet
 from harmonization_framework.primitives import (
-    Cast,
     ConvertDate,
     ConvertUnits,
     EnumToEnum,
@@ -145,25 +144,19 @@ def build() -> RuleSet:
     # than a wrong one. The source ORDER defines the index mapping, so the
     # sources list and the EnumToEnum keys must stay aligned.
     #
-    # WHY THE Cast("integer", "text") IN THE MIDDLE?
-    # This is a real serialization gotcha worth teaching. Reduce emits an
-    # integer index (0/1/2). EnumToEnum's JSON form only restores integer KEYS
-    # when *both* keys and values are int-like; because our values are strings
-    # ("research", ...), the keys round-trip from JSON as strings ("0", ...).
-    # An integer index would then miss every (string) key and fall through to
-    # the default. We cast the index to text and key the map by "0"/"1"/"2" so
-    # the lookup matches identically whether the rule runs in-memory or after a
-    # save()/load() round-trip through rules.json. Aligning value types across
-    # the serialization boundary is itself a harmonization discipline.
+    # The integer index feeds EnumToEnum directly, keyed by ints 0/1/2. No
+    # cast-to-text is needed: EnumToEnum serializes its mapping as a list of
+    # {from, to} entries, so the integer keys keep their type through a
+    # save()/load() round-trip and match the integer index identically in-memory
+    # and from rules.json.
     rules.add_rule(
         HarmonizationRule(
             sources=["consent_research", "consent_biobank", "consent_none"],
             target="consent_type",
             transformation=[
                 Reduce(Reduction.ONEHOT),
-                Cast("integer", "text"),
                 EnumToEnum(
-                    mapping={"0": "research", "1": "biobank", "2": "declined"},
+                    mapping={0: "research", 1: "biobank", 2: "declined"},
                     default="ambiguous",
                     strict=False,
                 ),
@@ -172,8 +165,8 @@ def build() -> RuleSet:
                 "rationale": "Collapse 3 mutually-exclusive one-hot consent "
                 "flags into one categorical; rows with zero/multiple flags "
                 "become 'ambiguous' (one-hot -> None -> default) instead of a "
-                "silently wrong label. Cast the index to text so the string "
-                "keys survive JSON round-trip. Source order defines the index."
+                "silently wrong label. Integer index keys EnumToEnum directly "
+                "(serialized form preserves key type). Source order = index."
             },
         )
     )

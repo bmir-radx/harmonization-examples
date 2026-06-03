@@ -29,23 +29,27 @@
         "reduction": "one-hot"
       },
       {
-        "operation": "cast",
-        "source": "integer",
-        "target": "text"
-      },
-      {
         "operation": "enum_to_enum",
-        "mapping": {
-          "0": "new",
-          "1": "active",
-          "2": "closed"
-        },
+        "mapping": [
+          {
+            "from": 0,
+            "to": "new"
+          },
+          {
+            "from": 1,
+            "to": "active"
+          },
+          {
+            "from": 2,
+            "to": "closed"
+          }
+        ],
         "strict": false,
         "default": "ambiguous"
       }
     ],
     "metadata": {
-      "rationale": "Mutually-exclusive status flags -> one label via ONE-HOT. Source order = index order. Zero/multiple set bits give None -> 'ambiguous'. Cast to text for JSON-stable keys."
+      "rationale": "Mutually-exclusive status flags -> one label via ONE-HOT. Source order = index order. Zero/multiple set bits give None -> 'ambiguous'. The integer index feeds EnumToEnum directly \u2014 keys are kept as ints through serialization."
     }
   },
   {

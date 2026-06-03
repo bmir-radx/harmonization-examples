@@ -37,7 +37,7 @@ enter from whichever interface you use and see that they agree:
 | 02 | [Units & Numbers](02-units-and-numbers/) | ✅ built | `convert_units`, `scale`, `round`, `threshold`, `bin`, `format_number` |
 | 03 | [Text & Names](03-text-and-names/) | ✅ built | `substitute`, `normalize_text`, `truncate` |
 | 04 | [Dates](04-dates/) | ✅ built | `convert_date` (incl. fail-fast) |
-| 05 | [Enums & Lookups](05-enums-and-lookups/) | ✅ built | `enum_to_enum` (strict vs. default), `cast`, int-key serialization fix |
+| 05 | [Enums & Lookups](05-enums-and-lookups/) | ✅ built | `enum_to_enum` (strict vs. default), `cast`, integer-keyed maps |
 | 06 | [Multi-source Aggregation](06-multi-source-aggregation/) | ✅ built | `reduce` (sum/one-hot), `parse_array`, `cast` |
 | 07 | [Nulls & Missing-Value Codes](07-nulls-and-missing-codes/) | ✅ built | null pass-through, missing-value-code handling, `--on-missing` |
 | 08 | [Clinical Intake Showcase](08-clinical-intake-showcase/) | ✅ built | realistic blend of the above |

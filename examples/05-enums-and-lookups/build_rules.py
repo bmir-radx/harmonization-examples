@@ -5,11 +5,12 @@ Mapping coded values to a target vocabulary, with two lessons:
 
   1. strict=True (fail fast) vs. strict=False + default (coerce + flag): pick
      per field based on whether the code set is guaranteed.
-  2. The integer-key serialization gotcha: EnumToEnum only restores INTEGER
-     keys from JSON when BOTH keys and values are int-like. If you map integer
-     codes to STRING labels, the keys round-trip as strings — so an integer
-     input misses every key. Fix: Cast the input to text and key the map by
-     strings. (Same fix used for the one-hot reduction in example 08.)
+  2. Integer-keyed maps just work: you can key an EnumToEnum by integers and
+     map them to string labels. The serialized form is a list of {from, to}
+     entries (not a JSON object), so the integer keys keep their type through a
+     rules.json round-trip and match integer inputs directly — no Cast-to-text
+     dance required. (The same is true of the one-hot reduction in examples
+     06/08, which now feed their integer index straight into EnumToEnum.)
 
 Primitives: cast, enum_to_enum.
 
@@ -27,33 +28,33 @@ def build() -> RuleSet:
     rules = RuleSet()
 
     # --- satisfaction (int 1..5) -> satisfaction_label ----------------------
-    # Likert code to a string label. The CSV value is an integer, but our map
-    # values are strings, so (per the gotcha above) the JSON keys would come
-    # back as strings. We Cast("integer","text") first and key the map by
-    # "1".."5" so the lookup matches identically in-memory and after a
-    # save()/load() round-trip through rules.json.
+    # Likert integer code to a string label. We key the map by integers and map
+    # them to string labels directly: the serialized form preserves the integer
+    # keys (see lesson 2 above), so the lookup matches the integer CSV value
+    # identically in-memory and after a save()/load() round-trip — no cast
+    # needed. Lenient with default='unknown' so an out-of-range code doesn't
+    # crash a survey import.
     rules.add_rule(
         HarmonizationRule(
             sources=["satisfaction"],
             target="satisfaction_label",
             transformation=[
-                Cast("integer", "text"),
                 EnumToEnum(
                     mapping={
-                        "1": "very_dissatisfied",
-                        "2": "dissatisfied",
-                        "3": "neutral",
-                        "4": "satisfied",
-                        "5": "very_satisfied",
+                        1: "very_dissatisfied",
+                        2: "dissatisfied",
+                        3: "neutral",
+                        4: "satisfied",
+                        5: "very_satisfied",
                     },
                     default="unknown",
                     strict=False,
                 ),
             ],
             metadata={
-                "rationale": "Likert int -> label. Cast to text so the string "
-                "keys survive JSON round-trip; lenient with default='unknown' "
-                "since out-of-range codes shouldn't crash a survey import."
+                "rationale": "Likert int -> label, keyed by integers (the "
+                "serialized form preserves key type, so no cast is needed); "
+                "lenient with default='unknown' for out-of-range codes."
             },
         )
     )

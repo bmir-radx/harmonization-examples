@@ -6,25 +6,35 @@
     "target": "satisfaction_label",
     "operations": [
       {
-        "operation": "cast",
-        "source": "integer",
-        "target": "text"
-      },
-      {
         "operation": "enum_to_enum",
-        "mapping": {
-          "1": "very_dissatisfied",
-          "2": "dissatisfied",
-          "3": "neutral",
-          "4": "satisfied",
-          "5": "very_satisfied"
-        },
+        "mapping": [
+          {
+            "from": 1,
+            "to": "very_dissatisfied"
+          },
+          {
+            "from": 2,
+            "to": "dissatisfied"
+          },
+          {
+            "from": 3,
+            "to": "neutral"
+          },
+          {
+            "from": 4,
+            "to": "satisfied"
+          },
+          {
+            "from": 5,
+            "to": "very_satisfied"
+          }
+        ],
         "strict": false,
         "default": "unknown"
       }
     ],
     "metadata": {
-      "rationale": "Likert int -> label. Cast to text so the string keys survive JSON round-trip; lenient with default='unknown' since out-of-range codes shouldn't crash a survey import."
+      "rationale": "Likert int -> label, keyed by integers (the serialized form preserves key type, so no cast is needed); lenient with default='unknown' for out-of-range codes."
     }
   },
   {
@@ -51,10 +61,16 @@
     "operations": [
       {
         "operation": "enum_to_enum",
-        "mapping": {
-          "web": "digital",
-          "phone": "assisted"
-        },
+        "mapping": [
+          {
+            "from": "web",
+            "to": "digital"
+          },
+          {
+            "from": "phone",
+            "to": "assisted"
+          }
+        ],
         "strict": false,
         "default": "other"
       }
@@ -71,11 +87,20 @@
     "operations": [
       {
         "operation": "enum_to_enum",
-        "mapping": {
-          "web": "digital",
-          "phone": "assisted",
-          "kiosk": "self_service"
-        },
+        "mapping": [
+          {
+            "from": "web",
+            "to": "digital"
+          },
+          {
+            "from": "phone",
+            "to": "assisted"
+          },
+          {
+            "from": "kiosk",
+            "to": "self_service"
+          }
+        ],
         "strict": true
       }
     ],
