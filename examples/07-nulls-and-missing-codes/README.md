@@ -143,10 +143,13 @@ unmapped value always returns the `default` — so `{-999: None}` with
 `default=None` would null *every* reading, not just the code, and you can't
 identity-map every legitimate value of a continuous measurement. The
 `missing_code` primitive exists for exactly this case. It is the
-identity-preserving null map `enum_to_enum` lacks:
+identity-preserving null map `enum_to_enum` lacks. In `rules.json` it serializes
+as a list of `{"code", "label"}` entries — an entry-list, not a JSON object, so
+the numeric code keeps its type through a round-trip (the same reason
+`enum_to_enum` uses `{"from","to"}` entries; see example 05):
 
 ```
-missing_code({-999: "not_measured"})
+"codes": [{"code": -999, "label": "not_measured"}]
   -999  → null        (the declared code becomes a real null)
   150.0 → 150.0       (every other value passes through unchanged)
 ```
@@ -164,15 +167,9 @@ with its label and row, to the **replay log**:
 So the distinction between different codes (`-999` = not measured vs, say, `-1` =
 refused) is preserved in the audit trail without cluttering the output. In the
 rule, `missing_code` runs **first**, on the raw `reading_lb` value: it turns
-`-999` into a null, and because `scale` is null-safe (`@handle_null`), the null
-passes straight through to a blank `reading_kg` for N3. No corruption, and the
+`-999` into a null, and because `scale` passes nulls through unchanged, the null
+flows straight to a blank `reading_kg` for N3. No corruption, and the
 codes and their meanings are declared right in `rules.json`.
-
-> When to still clean upstream: `missing_code` closes the in-pipeline gap, but
-> if a missing-value code is an *encoding defect* you control at the source
-> (e.g. a bad export), fixing it at ingestion still benefits every consumer, not
-> just this ruleset. Use `missing_code` when the code is an inherent property of
-> the data you receive; clean upstream when you own the encoding.
 
 ## Missing columns vs. missing values
 
