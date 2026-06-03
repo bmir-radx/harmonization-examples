@@ -1,0 +1,5 @@
+case_id,sym_fever,sym_cough,sym_fatigue,stat_new,stat_active,stat_closed,daily_scores
+K1,1,1,0,1,0,0,3|5|2
+K2,0,0,0,0,1,0,7|7
+K3,1,0,1,0,0,1,4|6|5|5
+K4,0,1,1,0,1,0,9

@@ -1,0 +1,50 @@
+[
+  {
+    "sources": [
+      "ordered_at"
+    ],
+    "target": "order_date",
+    "operations": [
+      {
+        "operation": "convert_date",
+        "source_format": "%Y-%m-%d %H:%M:%S",
+        "target_format": "%Y-%m-%d"
+      }
+    ],
+    "metadata": {
+      "rationale": "Reduce a full timestamp to a canonical date-only field; the time component is not needed downstream."
+    }
+  },
+  {
+    "sources": [
+      "ordered_at"
+    ],
+    "target": "order_month",
+    "operations": [
+      {
+        "operation": "convert_date",
+        "source_format": "%Y-%m-%d %H:%M:%S",
+        "target_format": "%b %Y"
+      }
+    ],
+    "metadata": {
+      "rationale": "Month-grain label for reporting/rollups, derived from the same timestamp."
+    }
+  },
+  {
+    "sources": [
+      "delivered_on"
+    ],
+    "target": "delivered_us",
+    "operations": [
+      {
+        "operation": "convert_date",
+        "source_format": "%Y-%m-%d",
+        "target_format": "%m/%d/%Y"
+      }
+    ],
+    "metadata": {
+      "rationale": "Reformat ISO date to US display format. Source is date-only, so the source_format has no time component."
+    }
+  }
+]

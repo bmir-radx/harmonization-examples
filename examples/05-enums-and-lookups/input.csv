@@ -1,0 +1,5 @@
+response_id,satisfaction,recommend,channel
+R1,5,1,web
+R2,3,0,phone
+R3,1,1,web
+R4,4,0,kiosk

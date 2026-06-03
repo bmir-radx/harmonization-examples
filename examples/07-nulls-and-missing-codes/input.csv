@@ -1,0 +1,5 @@
+sample_id,result,score,reading_lb
+N1,pos,12.5,150.0
+N2,neg,,160.0
+N3,UNK,8.0,-999
+N4,pos,,175.5

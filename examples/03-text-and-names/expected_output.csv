@@ -1,0 +1,5 @@
+contact_id,raw_name,country,display_name,name_ascii,country_code,source dataset,original_id
+C1,Dr. José  Ortega ,Spain,José Ortega,Jose Ortega,SP,names,0
+C2,  ms. ÅSA Lindqvist,Sweden,ÅSA Lindqvist,ASA Lindqvist,SW,names,1
+C3,Jean-Luc   Picard,France,Jean-Luc Picard,Jean-Luc Picard,FR,names,2
+C4,"O'Brien, Síle",Ireland,"O'Brien, Síle","O'Brien, Sile",IR,names,3

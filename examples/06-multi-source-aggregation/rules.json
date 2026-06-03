@@ -1,0 +1,74 @@
+[
+  {
+    "sources": [
+      "sym_fever",
+      "sym_cough",
+      "sym_fatigue"
+    ],
+    "target": "symptom_count",
+    "operations": [
+      {
+        "operation": "reduce",
+        "reduction": "sum"
+      }
+    ],
+    "metadata": {
+      "rationale": "Independent (non-exclusive) symptom flags -> a count via SUM. ONE-HOT would be wrong: more than one can be set."
+    }
+  },
+  {
+    "sources": [
+      "stat_new",
+      "stat_active",
+      "stat_closed"
+    ],
+    "target": "triage_status",
+    "operations": [
+      {
+        "operation": "reduce",
+        "reduction": "one-hot"
+      },
+      {
+        "operation": "cast",
+        "source": "integer",
+        "target": "text"
+      },
+      {
+        "operation": "enum_to_enum",
+        "mapping": {
+          "0": "new",
+          "1": "active",
+          "2": "closed"
+        },
+        "strict": false,
+        "default": "ambiguous"
+      }
+    ],
+    "metadata": {
+      "rationale": "Mutually-exclusive status flags -> one label via ONE-HOT. Source order = index order. Zero/multiple set bits give None -> 'ambiguous'. Cast to text for JSON-stable keys."
+    }
+  },
+  {
+    "sources": [
+      "daily_scores"
+    ],
+    "target": "score_total",
+    "operations": [
+      {
+        "operation": "parse_array",
+        "format": "delimiter",
+        "item_type": "integer",
+        "strict": true,
+        "allow_singleton": false,
+        "delimiter": "|"
+      },
+      {
+        "operation": "reduce",
+        "reduction": "sum"
+      }
+    ],
+    "metadata": {
+      "rationale": "Packed multi-value cell: parse_array -> list of ints, then SUM. Demonstrates aggregation within one column."
+    }
+  }
+]

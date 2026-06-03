@@ -1,0 +1,75 @@
+[
+  {
+    "sources": [
+      "raw_name"
+    ],
+    "target": "display_name",
+    "operations": [
+      {
+        "operation": "substitute",
+        "expression": "(?i)^\\s*(dr|mr|mrs|ms|prof)\\.?\\s+",
+        "substitution": ""
+      },
+      {
+        "operation": "substitute",
+        "expression": "\\s+",
+        "substitution": " "
+      },
+      {
+        "operation": "normalize_text",
+        "normalization": "strip"
+      }
+    ],
+    "metadata": {
+      "rationale": "Strip honorific prefix, collapse internal whitespace, trim ends. Substitutions run before the strip so the regex anchors (^) still see the original leading text."
+    }
+  },
+  {
+    "sources": [
+      "raw_name"
+    ],
+    "target": "name_ascii",
+    "operations": [
+      {
+        "operation": "substitute",
+        "expression": "(?i)^\\s*(dr|mr|mrs|ms|prof)\\.?\\s+",
+        "substitution": ""
+      },
+      {
+        "operation": "substitute",
+        "expression": "\\s+",
+        "substitution": " "
+      },
+      {
+        "operation": "normalize_text",
+        "normalization": "strip"
+      },
+      {
+        "operation": "normalize_text",
+        "normalization": "remove_accents"
+      }
+    ],
+    "metadata": {
+      "rationale": "ASCII-folded variant for matching/joining. Accent removal (NFKD) runs last, on already-cleaned text."
+    }
+  },
+  {
+    "sources": [
+      "country"
+    ],
+    "target": "country_code",
+    "operations": [
+      {
+        "operation": "truncate",
+        "length": 2
+      },
+      {
+        "operation": "normalize_text",
+        "normalization": "upper"
+      }
+    ],
+    "metadata": {
+      "rationale": "Crude 2-letter code via truncate+upper to demonstrate truncate. For authoritative codes use an enum_to_enum lookup instead (see example 05)."
+    }
+  }
+]

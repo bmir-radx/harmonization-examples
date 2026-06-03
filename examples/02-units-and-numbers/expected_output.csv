@@ -1,0 +1,6 @@
+subject_id,age,height_in,weight_lb,oxygen_saturation,height_cm,weight_kg,spo2_clamped,age_band,source dataset,original_id
+S1,7,48.5,52.0,98,123.2,23.59,98.0,child,vitals,0
+S2,34,70.1,185.4,97,178.1,84.10,97.0,adult,vitals,1
+S3,62,66.0,210.7,101,167.6,95.57,100.0,adult,vitals,2
+S4,15,61.25,120.0,88,155.6,54.43,88.0,adolescent,vitals,3
+S5,3,38.0,33.1,95,96.5,15.01,95.0,child,vitals,4

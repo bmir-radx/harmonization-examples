@@ -1,0 +1,5 @@
+shipment_id,ordered_at,delivered_on,order_date,order_month,delivered_us,source dataset,original_id
+SH1,2025-01-05 09:30:00,2025-01-08,2025-01-05,Jan 2025,01/08/2025,events,0
+SH2,2025-02-14 17:05:00,2025-02-19,2025-02-14,Feb 2025,02/19/2025,events,1
+SH3,2025-03-30 23:59:00,2025-04-02,2025-03-30,Mar 2025,04/02/2025,events,2
+SH4,2025-11-01 06:00:00,2025-11-03,2025-11-01,Nov 2025,11/03/2025,events,3

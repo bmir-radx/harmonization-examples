@@ -1,0 +1,5 @@
+participant_id,full_name,status_code,name,status,source dataset,original_id
+P001,Ada Lovelace,A,Ada Lovelace,active,hello,0
+P002,Alan Turing,I,Alan Turing,inactive,hello,1
+P003,Grace Hopper,P,Grace Hopper,pending,hello,2
+P004,Katherine Johnson,A,Katherine Johnson,active,hello,3

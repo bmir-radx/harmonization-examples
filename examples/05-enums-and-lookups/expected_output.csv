@@ -1,0 +1,5 @@
+response_id,satisfaction,recommend,channel,satisfaction_label,would_recommend,channel_group,channel_strict,source dataset,original_id
+R1,5,1,web,very_satisfied,True,digital,digital,survey,0
+R2,3,0,phone,neutral,False,assisted,assisted,survey,1
+R3,1,1,web,very_dissatisfied,True,digital,digital,survey,2
+R4,4,0,kiosk,satisfied,False,other,self_service,survey,3

@@ -1,0 +1,131 @@
+[
+  {
+    "sources": [
+      "patient_name"
+    ],
+    "target": "family_name",
+    "operations": [
+      {
+        "operation": "substitute",
+        "expression": "^\\s*([^,]+?)\\s*,.*$",
+        "substitution": "\\1"
+      },
+      {
+        "operation": "normalize_text",
+        "normalization": "lower"
+      }
+    ],
+    "metadata": {
+      "rationale": "Extract surname (before comma), then lowercase to absorb inconsistent casing/whitespace across sites."
+    }
+  },
+  {
+    "sources": [
+      "patient_name"
+    ],
+    "target": "given_name",
+    "operations": [
+      {
+        "operation": "substitute",
+        "expression": "^[^,]*,\\s*(.+?)\\s*$",
+        "substitution": "\\1"
+      },
+      {
+        "operation": "normalize_text",
+        "normalization": "lower"
+      }
+    ],
+    "metadata": {
+      "rationale": "Extract given name (after comma), then lowercase; mirrors the family_name rule on the same source column."
+    }
+  },
+  {
+    "sources": [
+      "visit_code"
+    ],
+    "target": "visit_type",
+    "operations": [
+      {
+        "operation": "enum_to_enum",
+        "mapping": {
+          "BL": "baseline",
+          "FU": "follow_up",
+          "SC": "screening"
+        },
+        "strict": false,
+        "default": "unmapped"
+      }
+    ],
+    "metadata": {
+      "rationale": "Site codes drift; map the known set and surface anything else as 'unmapped' rather than failing the batch."
+    }
+  },
+  {
+    "sources": [
+      "visit_date"
+    ],
+    "target": "visit_date_us",
+    "operations": [
+      {
+        "operation": "convert_date",
+        "source_format": "%Y-%m-%d",
+        "target_format": "%m/%d/%Y"
+      }
+    ],
+    "metadata": {
+      "rationale": "Reformat to US display format. ConvertDate fails fast on malformed dates by design \u2014 preferable to a silent misparse for a clinically meaningful field."
+    }
+  },
+  {
+    "sources": [
+      "height_in"
+    ],
+    "target": "height_cm",
+    "operations": [
+      {
+        "operation": "convert_units",
+        "source_unit": "inch",
+        "target_unit": "cm"
+      },
+      {
+        "operation": "round",
+        "precision": 1
+      }
+    ],
+    "metadata": {
+      "rationale": "Convert at full precision, then round to 1 dp."
+    }
+  },
+  {
+    "sources": [
+      "consent_research",
+      "consent_biobank",
+      "consent_none"
+    ],
+    "target": "consent_type",
+    "operations": [
+      {
+        "operation": "reduce",
+        "reduction": "one-hot"
+      },
+      {
+        "operation": "cast",
+        "source": "integer",
+        "target": "text"
+      },
+      {
+        "operation": "enum_to_enum",
+        "mapping": {
+          "0": "research",
+          "1": "biobank",
+          "2": "declined"
+        },
+        "strict": false,
+        "default": "ambiguous"
+      }
+    ],
+    "metadata": {
+      "rationale": "Collapse 3 mutually-exclusive one-hot consent flags into one categorical; rows with zero/multiple flags become 'ambiguous' (one-hot -> None -> default) instead of a silently wrong label. Cast the index to text so the string keys survive JSON round-trip. Source order defines the index."
+    }
+  }
+]

@@ -1,0 +1,13 @@
+# Generated run artifacts from the examples (the golden files are committed instead)
+examples/**/output.csv
+examples/**/output_cli.csv
+examples/**/output_rpc.csv
+examples/**/replay.log
+
+# Python
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+.idea/

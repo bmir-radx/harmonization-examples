@@ -1,0 +1,5 @@
+sample_id,result,score,reading_lb,result_clean,score_x10,reading_kg,source dataset,original_id
+N1,pos,12.5,150.0,positive,125.0,68.0388555,messy,0
+N2,neg,,160.0,negative,,72.57477920000001,messy,1
+N3,UNK,8.0,-999.0,,80.0,,messy,2
+N4,pos,,175.5,positive,,79.60546093500001,messy,3

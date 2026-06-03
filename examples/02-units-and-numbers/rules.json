@@ -1,0 +1,93 @@
+[
+  {
+    "sources": [
+      "height_in"
+    ],
+    "target": "height_cm",
+    "operations": [
+      {
+        "operation": "convert_units",
+        "source_unit": "inch",
+        "target_unit": "cm"
+      },
+      {
+        "operation": "round",
+        "precision": 1
+      }
+    ],
+    "metadata": {
+      "rationale": "Convert at full precision, then round. Rounding before the conversion would amplify rounding error."
+    }
+  },
+  {
+    "sources": [
+      "weight_lb"
+    ],
+    "target": "weight_kg",
+    "operations": [
+      {
+        "operation": "scale",
+        "scaling_factor": 0.45359237
+      },
+      {
+        "operation": "format_number",
+        "precision": 2
+      }
+    ],
+    "metadata": {
+      "rationale": "Scale to kg, then FormatNumber(2) to pin a stable 2-decimal string for display/export."
+    }
+  },
+  {
+    "sources": [
+      "oxygen_saturation"
+    ],
+    "target": "spo2_clamped",
+    "operations": [
+      {
+        "operation": "threshold",
+        "lower": 0.0,
+        "upper": 100.0
+      }
+    ],
+    "metadata": {
+      "rationale": "SpO2 > 100% is physically impossible (sensor artifact); clamp to [0,100] deterministically instead of dropping the row."
+    }
+  },
+  {
+    "sources": [
+      "age"
+    ],
+    "target": "age_band",
+    "operations": [
+      {
+        "operation": "bin",
+        "bins": [
+          {
+            "label": "child",
+            "start": 0,
+            "end": 12
+          },
+          {
+            "label": "adolescent",
+            "start": 13,
+            "end": 17
+          },
+          {
+            "label": "adult",
+            "start": 18,
+            "end": 64
+          },
+          {
+            "label": "older_adult",
+            "start": 65,
+            "end": 120
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "rationale": "Coarse life-stage bands with inclusive, non-overlapping integer ranges covering 0..120."
+    }
+  }
+]

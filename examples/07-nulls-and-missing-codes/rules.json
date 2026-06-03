@@ -1,0 +1,59 @@
+[
+  {
+    "sources": [
+      "result"
+    ],
+    "target": "result_clean",
+    "operations": [
+      {
+        "operation": "enum_to_enum",
+        "mapping": {
+          "pos": "positive",
+          "neg": "negative",
+          "UNK": null
+        },
+        "strict": false,
+        "default": "unexpected"
+      }
+    ],
+    "metadata": {
+      "rationale": "Missing-value code 'UNK' -> null by mapping it explicitly alongside the real vocabulary; default flags only truly unexpected codes. (No null_if primitive exists.)"
+    }
+  },
+  {
+    "sources": [
+      "score"
+    ],
+    "target": "score_x10",
+    "operations": [
+      {
+        "operation": "scale",
+        "scaling_factor": 10
+      }
+    ],
+    "metadata": {
+      "rationale": "Genuine NaN passes through @handle_null unchanged; a blank input cell yields a blank output cell."
+    }
+  },
+  {
+    "sources": [
+      "reading_lb"
+    ],
+    "target": "reading_kg",
+    "operations": [
+      {
+        "operation": "missing_code",
+        "codes": {
+          "-999": "not_measured"
+        }
+      },
+      {
+        "operation": "scale",
+        "scaling_factor": 0.45359237
+      }
+    ],
+    "metadata": {
+      "rationale": "Numeric missing-value code -999 -> null via missing_code (identity-preserving: other readings pass through), then Scale passes the null through. The label is reported to the replay log."
+    }
+  }
+]
