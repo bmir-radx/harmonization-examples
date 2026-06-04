@@ -1,8 +1,23 @@
 # 08 — Clinical Intake Showcase
 
-A realistic, end-to-end example. Where the tutorials isolate one idea each, this
-one harmonizes a messy intake CSV the way you'd actually have to, and focuses on
-the **decisions** — fail vs. coerce vs. default, and many-to-one mapping.
+An end-to-end example that combines the primitives from the earlier tutorials on
+one input. Where each earlier example isolates a single idea, this one
+harmonizes an intake CSV with several different problems at once — name
+reshaping, an out-of-vocabulary code, a date reformat, a unit conversion, and a
+multi-column consent reduction. The focus is on the **decisions**: when to fail
+on a bad value and when to coerce it, and how to collapse several columns into
+one.
+
+## What it teaches
+
+- **Combining primitives on real input.** `substitute`, `normalize_text`,
+  `enum_to_enum`, `convert_date`, `convert_units`, `round`, and `reduce` applied
+  together on one file.
+- **Fail vs. coerce, per field.** The same file lets a clinically meaningful
+  date fail fast while coercing a non-critical out-of-vocabulary code to a
+  flagged value.
+- **Many-to-one reduction.** Three one-hot consent columns collapse to a single
+  `consent_type` label.
 
 ## The data (and its messes)
 
@@ -27,7 +42,7 @@ columns.
 | `patient_name` | `family_name` | `substitute(before comma)` → `normalize_text(lower)` | Define the field, then clean casing/whitespace. |
 | `patient_name` | `given_name` | `substitute(after comma)` → `normalize_text(lower)` | Two rules on one column = split a field. |
 | `visit_code` | `visit_type` | `enum_to_enum(default="unmapped")` | **Coerce + flag.** `XX` → `"unmapped"` so the batch survives and the anomaly stays visible. |
-| `visit_date` | `visit_date_us` | `convert_date(%Y-%m-%d → %m/%d/%Y)` | **Fail fast.** A malformed date raises — a silent misparse is worse than a loud error for a clinical field. |
+| `visit_date` | `visit_date_us` | `convert_date(%Y-%m-%d → %m/%d/%Y)` | **Fail fast.** A malformed date raises an error — a silent misparse is worse than a loud error for a clinical field. |
 | `height_in` | `height_cm` | `convert_units(inch→cm)` → `round(1)` | Convert at full precision, then round. |
 | `consent_research`, `consent_biobank`, `consent_none` | `consent_type` | `reduce(one-hot)` → `enum_to_enum(default="ambiguous", int keys)` | **Many-to-one**: collapse three flags to one label (below). |
 
@@ -62,11 +77,229 @@ every key.)
 > preserves key types, so the cast is gone; the self-checking
 > `expected_output.csv` still guards the result.
 
+## The rules, serialized
+
+The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+
+`rules.json`:
+
+```json
+[
+  {
+    "sources": [
+      "patient_name"
+    ],
+    "target": "family_name",
+    "operations": [
+      {
+        "operation": "substitute",
+        "expression": "^\\s*([^,]+?)\\s*,.*$",
+        "substitution": "\\1"
+      },
+      {
+        "operation": "normalize_text",
+        "normalization": "lower"
+      }
+    ],
+    "metadata": {
+      "rationale": "Extract surname (before comma), then lowercase to absorb inconsistent casing/whitespace across sites."
+    }
+  },
+  {
+    "sources": [
+      "patient_name"
+    ],
+    "target": "given_name",
+    "operations": [
+      {
+        "operation": "substitute",
+        "expression": "^[^,]*,\\s*(.+?)\\s*$",
+        "substitution": "\\1"
+      },
+      {
+        "operation": "normalize_text",
+        "normalization": "lower"
+      }
+    ],
+    "metadata": {
+      "rationale": "Extract given name (after comma), then lowercase; mirrors the family_name rule on the same source column."
+    }
+  },
+  {
+    "sources": [
+      "visit_code"
+    ],
+    "target": "visit_type",
+    "operations": [
+      {
+        "operation": "enum_to_enum",
+        "mapping": [
+          {
+            "from": "BL",
+            "to": "baseline"
+          },
+          {
+            "from": "FU",
+            "to": "follow_up"
+          },
+          {
+            "from": "SC",
+            "to": "screening"
+          }
+        ],
+        "strict": false,
+        "default": "unmapped"
+      }
+    ],
+    "metadata": {
+      "rationale": "Site codes drift; map the known set and surface anything else as 'unmapped' rather than failing the batch."
+    }
+  },
+  {
+    "sources": [
+      "visit_date"
+    ],
+    "target": "visit_date_us",
+    "operations": [
+      {
+        "operation": "convert_date",
+        "source_format": "%Y-%m-%d",
+        "target_format": "%m/%d/%Y"
+      }
+    ],
+    "metadata": {
+      "rationale": "Reformat to US display format. ConvertDate fails fast on malformed dates by design \u2014 preferable to a silent misparse for a clinically meaningful field."
+    }
+  },
+  {
+    "sources": [
+      "height_in"
+    ],
+    "target": "height_cm",
+    "operations": [
+      {
+        "operation": "convert_units",
+        "source_unit": "inch",
+        "target_unit": "cm"
+      },
+      {
+        "operation": "round",
+        "precision": 1
+      }
+    ],
+    "metadata": {
+      "rationale": "Convert at full precision, then round to 1 dp."
+    }
+  },
+  {
+    "sources": [
+      "consent_research",
+      "consent_biobank",
+      "consent_none"
+    ],
+    "target": "consent_type",
+    "operations": [
+      {
+        "operation": "reduce",
+        "reduction": "one-hot"
+      },
+      {
+        "operation": "enum_to_enum",
+        "mapping": [
+          {
+            "from": 0,
+            "to": "research"
+          },
+          {
+            "from": 1,
+            "to": "biobank"
+          },
+          {
+            "from": 2,
+            "to": "declined"
+          }
+        ],
+        "strict": false,
+        "default": "ambiguous"
+      }
+    ],
+    "metadata": {
+      "rationale": "Collapse 3 mutually-exclusive one-hot consent flags into one categorical; rows with zero/multiple flags become 'ambiguous' (one-hot -> None -> default) instead of a silently wrong label. Integer index keys EnumToEnum directly (serialized form preserves key type). Source order = index."
+    }
+  }
+]
+```
+
+`rules.yaml`:
+
+```yaml
+- sources: [patient_name]
+  target: family_name
+  operations:
+  - {operation: substitute, expression: '^\s*([^,]+?)\s*,.*$', substitution: \1}
+  - {operation: normalize_text, normalization: lower}
+  metadata: {rationale: 'Extract surname (before comma), then lowercase to absorb
+      inconsistent casing/whitespace across sites.'}
+
+- sources: [patient_name]
+  target: given_name
+  operations:
+  - {operation: substitute, expression: '^[^,]*,\s*(.+?)\s*$', substitution: \1}
+  - {operation: normalize_text, normalization: lower}
+  metadata: {rationale: 'Extract given name (after comma), then lowercase; mirrors
+      the family_name rule on the same source column.'}
+
+- sources: [visit_code]
+  target: visit_type
+  operations:
+  - operation: enum_to_enum
+    mapping:
+    - {from: BL, to: baseline}
+    - {from: FU, to: follow_up}
+    - {from: SC, to: screening}
+    strict: false
+    default: unmapped
+  metadata: {rationale: Site codes drift; map the known set and surface anything else
+      as 'unmapped' rather than failing the batch.}
+
+- sources: [visit_date]
+  target: visit_date_us
+  operations:
+  - {operation: convert_date, source_format: '%Y-%m-%d', target_format: '%m/%d/%Y'}
+  metadata: {rationale: "Reformat to US display format. ConvertDate fails fast on\
+      \ malformed dates by design \u2014 preferable to a silent misparse for a clinically\
+      \ meaningful field."}
+
+- sources: [height_in]
+  target: height_cm
+  operations:
+  - {operation: convert_units, source_unit: inch, target_unit: cm}
+  - {operation: round, precision: 1}
+  metadata: {rationale: 'Convert at full precision, then round to 1 dp.'}
+
+- sources: [consent_research, consent_biobank, consent_none]
+  target: consent_type
+  operations:
+  - {operation: reduce, reduction: one-hot}
+  - operation: enum_to_enum
+    mapping:
+    - {from: 0, to: research}
+    - {from: 1, to: biobank}
+    - {from: 2, to: declined}
+    strict: false
+    default: ambiguous
+  metadata: {rationale: Collapse 3 mutually-exclusive one-hot consent flags into one
+      categorical; rows with zero/multiple flags become 'ambiguous' (one-hot -> None
+      -> default) instead of a silently wrong label. Integer index keys EnumToEnum
+      directly (serialized form preserves key type). Source order = index.}
+```
+
 ## Running it
 
 ```bash
 ../../../harmonization-framework/venv/bin/python build_rules.py
 ../../../harmonization-framework/venv/bin/python run_python.py   # run + assert
+../../../harmonization-framework/venv/bin/python run_yaml.py     # same, from rules.yaml
 bash run_cli.sh
 ```
 

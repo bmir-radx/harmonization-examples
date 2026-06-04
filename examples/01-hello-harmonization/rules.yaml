@@ -1,0 +1,20 @@
+- sources: [full_name]
+  target: name
+  operations:
+  - {operation: do_nothing}
+  metadata: {rationale: Source is already clean; carry it across under the canonical
+      column name with no transformation.}
+
+- sources: [status_code]
+  target: status
+  operations:
+  - operation: enum_to_enum
+    mapping:
+    - {from: A, to: active}
+    - {from: I, to: inactive}
+    - {from: P, to: pending}
+    strict: false
+    default: unknown
+  metadata: {rationale: Codes are controlled but data entry is imperfect; map known
+      codes and surface anything unexpected as 'unknown' rather than failing the batch
+      or emitting a blank.}

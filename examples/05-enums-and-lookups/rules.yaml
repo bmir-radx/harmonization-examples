@@ -1,0 +1,47 @@
+- sources: [satisfaction]
+  target: satisfaction_label
+  operations:
+  - operation: enum_to_enum
+    mapping:
+    - {from: 1, to: very_dissatisfied}
+    - {from: 2, to: dissatisfied}
+    - {from: 3, to: neutral}
+    - {from: 4, to: satisfied}
+    - {from: 5, to: very_satisfied}
+    strict: false
+    default: unknown
+  metadata: {rationale: 'Likert int -> label, keyed by integers (the serialized form
+      preserves key type, so no cast is needed); lenient with default=''unknown''
+      for out-of-range codes.'}
+
+- sources: [recommend]
+  target: would_recommend
+  operations:
+  - {operation: cast, source: integer, target: boolean}
+  metadata: {rationale: 0/1 flag -> native boolean via cast; no lookup table required
+      for a true binary.}
+
+- sources: [channel]
+  target: channel_group
+  operations:
+  - operation: enum_to_enum
+    mapping:
+    - {from: web, to: digital}
+    - {from: phone, to: assisted}
+    strict: false
+    default: other
+  metadata: {rationale: 'Open-ended channel vocabulary: map the known set, coerce
+      the rest to ''other'' rather than failing.'}
+
+- sources: [channel]
+  target: channel_strict
+  operations:
+  - operation: enum_to_enum
+    mapping:
+    - {from: web, to: digital}
+    - {from: phone, to: assisted}
+    - {from: kiosk, to: self_service}
+    strict: true
+  metadata: {rationale: 'Contrast to channel_group: strict mapping that raises on
+      any unknown code. Use when the vocabulary is a hard contract and an unexpected
+      value must halt the import.'}

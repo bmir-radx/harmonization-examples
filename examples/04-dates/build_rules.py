@@ -1,8 +1,7 @@
 """
 Example 04 — Dates (rule definitions / SOURCE OF TRUTH).
 
-Normalizing date/time fields to canonical formats with `convert_date`
-(strptime/strftime under the hood).
+Normalizing date/time fields to canonical formats with `convert_date`.
 
 The key behaviour to internalize: **convert_date is strict.** A value that does
 not match `source_format` raises a ValueError rather than guessing. For dates
@@ -74,9 +73,13 @@ def build() -> RuleSet:
 
 def main() -> None:
     rules = build()
-    out_path = Path(__file__).resolve().parent / "rules.json"
-    rules.save(str(out_path))
-    print(f"Wrote {len(rules)} rules to {out_path}")
+    here = Path(__file__).resolve().parent
+    # Save the same rules in both formats. rules.json is the primary artifact;
+    # rules.yaml is the equivalent YAML serialization (the framework loads
+    # either, picking the format by file extension).
+    rules.save(str(here / "rules.json"))
+    rules.save(str(here / "rules.yaml"))
+    print(f"Wrote {len(rules)} rules to rules.json and rules.yaml")
 
 
 if __name__ == "__main__":

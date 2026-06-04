@@ -9,9 +9,9 @@ takes one or more **source** columns and produces a single **target** column by
 running the source value through an ordered list of **primitive operations** —
 small, named transformations like "look this code up in a table" or "carry it
 across unchanged." A collection of rules is a **RuleSet**, which you build in
-Python and save to a file called `rules.json`. That file is the single source of
-truth: both the Python API and the command-line tool read the *same*
-`rules.json`, so the mapping you write once runs identically through both.
+Python and save to a file called `rules.json`. You define the rules once there;
+both the Python API and the command-line tool read that same `rules.json`, so
+the mapping runs identically through either.
 
 ## What it teaches
 
@@ -21,9 +21,9 @@ truth: both the Python API and the command-line tool read the *same*
 - **Two foundational primitives.** `do_nothing` carries a column across
   unchanged (effectively a rename), and `enum_to_enum` looks source codes up in
   a table to produce target labels.
-- **One source of truth, two ways to run it.** A `RuleSet` saved to `rules.json`
-  is consumed unchanged by both the Python API and the CLI — so the rules are
-  written and tested once, not twice.
+- **The rules file drives both interfaces.** A `RuleSet` saved to `rules.json`
+  is read unchanged by both the Python API and the CLI, so you write the rules
+  once and both run the same thing.
 
 ## The data
 
@@ -80,24 +80,107 @@ strict-vs-lenient trade-off in depth.)
 The reasoning for each rule is also recorded in its `metadata.rationale`, so it
 survives into `rules.json` and travels with the rule.
 
-## One source of truth, two ways to run it
+## The rules, serialized
 
-`build_rules.py` is the only place the rules are defined. Running it writes
-`rules.json`, and that file is the contract both interfaces read:
+The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+
+`rules.json`:
+
+```json
+[
+  {
+    "sources": [
+      "full_name"
+    ],
+    "target": "name",
+    "operations": [
+      {
+        "operation": "do_nothing"
+      }
+    ],
+    "metadata": {
+      "rationale": "Source is already clean; carry it across under the canonical column name with no transformation."
+    }
+  },
+  {
+    "sources": [
+      "status_code"
+    ],
+    "target": "status",
+    "operations": [
+      {
+        "operation": "enum_to_enum",
+        "mapping": [
+          {
+            "from": "A",
+            "to": "active"
+          },
+          {
+            "from": "I",
+            "to": "inactive"
+          },
+          {
+            "from": "P",
+            "to": "pending"
+          }
+        ],
+        "strict": false,
+        "default": "unknown"
+      }
+    ],
+    "metadata": {
+      "rationale": "Codes are controlled but data entry is imperfect; map known codes and surface anything unexpected as 'unknown' rather than failing the batch or emitting a blank."
+    }
+  }
+]
+```
+
+`rules.yaml`:
+
+```yaml
+- sources: [full_name]
+  target: name
+  operations:
+  - {operation: do_nothing}
+  metadata: {rationale: Source is already clean; carry it across under the canonical
+      column name with no transformation.}
+
+- sources: [status_code]
+  target: status
+  operations:
+  - operation: enum_to_enum
+    mapping:
+    - {from: A, to: active}
+    - {from: I, to: inactive}
+    - {from: P, to: pending}
+    strict: false
+    default: unknown
+  metadata: {rationale: Codes are controlled but data entry is imperfect; map known
+      codes and surface anything unexpected as 'unknown' rather than failing the batch
+      or emitting a blank.}
+```
+
+## Running it
+
+`build_rules.py` is the only place the rules are defined. Running it writes both
+`rules.json` and `rules.yaml`, and the other interfaces read those files:
 
 ```bash
-# 0. (Re)generate rules.json from the Python source of truth:
+# 0. (Re)generate rules.json AND rules.yaml from build_rules.py:
 ../../../harmonization-framework/venv/bin/python build_rules.py
 
 # 1. Python API — harmonizes and checks the result against expected_output.csv:
 ../../../harmonization-framework/venv/bin/python run_python.py
 
-# 2. CLI — same rules.json, no Python needed:
+# 2. Same, but loading the YAML rules instead — same output:
+../../../harmonization-framework/venv/bin/python run_yaml.py
+
+# 3. CLI — no Python needed (accepts rules.json or rules.yaml):
 bash run_cli.sh
 ```
 
-Because both read the same `rules.json`, the mapping behaves the same way
-whichever you use. There is one intentional difference in *output shape*: the
+Because they all read the same rules, the mapping behaves the same way whichever
+you use. There is one intentional difference in *output shape*: the
 Python API returns every input column plus the new targets, while the CLI
 returns only the target columns (add `--include-metadata` to also get the
 `source dataset` / `original_id` columns). Same rules, same values — the

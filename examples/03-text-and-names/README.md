@@ -1,15 +1,23 @@
 # 03 — Text & Names
 
-Cleaning and reshaping free-text fields — the most error-prone part of most
-harmonizations.
+Free-text fields often need several cleanups at once: a name might carry a
+leading honorific, irregular internal spacing, trailing whitespace, accents, or
+a `"Last, First"` ordering. Cleaning them is a matter of applying small string
+transforms in the right *sequence*, because a step that depends on the original
+structure (a regex anchored on a capital letter, say) must run before a step
+that changes that structure (lowercasing). This example cleans a set of untidy
+names and shows the ordering that keeps text transforms from undoing each
+other.
 
 ## What it teaches
 
-- `substitute` — regex extract/replace (drop honorifics, collapse whitespace).
-- `normalize_text` — `strip`, `upper`, `remove_accents` (NFKD folding, so
-  `José` → `Jose`, `ÅSA` → `ASA`, `Síle` → `Sile`).
-- `truncate` — cap a string to a fixed length.
-- The recurring rule: **substitute/clean structure first, normalize second.**
+- **Extracting and replacing with `substitute`.** A regex extract/replace —
+  here used to drop honorifics and collapse runs of whitespace.
+- **Normalising with `normalize_text`.** `strip`, `upper`, and `remove_accents`
+  (NFKD folding, so `José` → `Jose`, `ÅSA` → `ASA`, `Síle` → `Sile`).
+- **Capping length with `truncate`.** Cut a string to a fixed length.
+- **The recurring discipline.** Clean the *structure* first with `substitute`,
+  then `normalize` the result — not the other way around.
 
 ## The data
 
@@ -45,11 +53,128 @@ for an authoritative code system — `SW` for Sweden isn't ISO-3166 (`SE`).
 Authoritative code mapping belongs in an `enum_to_enum` lookup (example 05).
 The example includes this on purpose so the contrast is explicit.
 
+## The rules, serialized
+
+The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+
+`rules.json`:
+
+```json
+[
+  {
+    "sources": [
+      "raw_name"
+    ],
+    "target": "display_name",
+    "operations": [
+      {
+        "operation": "substitute",
+        "expression": "(?i)^\\s*(dr|mr|mrs|ms|prof)\\.?\\s+",
+        "substitution": ""
+      },
+      {
+        "operation": "substitute",
+        "expression": "\\s+",
+        "substitution": " "
+      },
+      {
+        "operation": "normalize_text",
+        "normalization": "strip"
+      }
+    ],
+    "metadata": {
+      "rationale": "Strip honorific prefix, collapse internal whitespace, trim ends. Substitutions run before the strip so the regex anchors (^) still see the original leading text."
+    }
+  },
+  {
+    "sources": [
+      "raw_name"
+    ],
+    "target": "name_ascii",
+    "operations": [
+      {
+        "operation": "substitute",
+        "expression": "(?i)^\\s*(dr|mr|mrs|ms|prof)\\.?\\s+",
+        "substitution": ""
+      },
+      {
+        "operation": "substitute",
+        "expression": "\\s+",
+        "substitution": " "
+      },
+      {
+        "operation": "normalize_text",
+        "normalization": "strip"
+      },
+      {
+        "operation": "normalize_text",
+        "normalization": "remove_accents"
+      }
+    ],
+    "metadata": {
+      "rationale": "ASCII-folded variant for matching/joining. Accent removal (NFKD) runs last, on already-cleaned text."
+    }
+  },
+  {
+    "sources": [
+      "country"
+    ],
+    "target": "country_code",
+    "operations": [
+      {
+        "operation": "truncate",
+        "length": 2
+      },
+      {
+        "operation": "normalize_text",
+        "normalization": "upper"
+      }
+    ],
+    "metadata": {
+      "rationale": "Crude 2-letter code via truncate+upper to demonstrate truncate. For authoritative codes use an enum_to_enum lookup instead (see example 05)."
+    }
+  }
+]
+```
+
+`rules.yaml`:
+
+```yaml
+- sources: [raw_name]
+  target: display_name
+  operations:
+  - {operation: substitute, expression: '(?i)^\s*(dr|mr|mrs|ms|prof)\.?\s+', substitution: ''}
+  - {operation: substitute, expression: \s+, substitution: ' '}
+  - {operation: normalize_text, normalization: strip}
+  metadata: {rationale: 'Strip honorific prefix, collapse internal whitespace, trim
+      ends. Substitutions run before the strip so the regex anchors (^) still see
+      the original leading text.'}
+
+- sources: [raw_name]
+  target: name_ascii
+  operations:
+  - {operation: substitute, expression: '(?i)^\s*(dr|mr|mrs|ms|prof)\.?\s+', substitution: ''}
+  - {operation: substitute, expression: \s+, substitution: ' '}
+  - {operation: normalize_text, normalization: strip}
+  - {operation: normalize_text, normalization: remove_accents}
+  metadata: {rationale: 'ASCII-folded variant for matching/joining. Accent removal
+      (NFKD) runs last, on already-cleaned text.'}
+
+- sources: [country]
+  target: country_code
+  operations:
+  - {operation: truncate, length: 2}
+  - {operation: normalize_text, normalization: upper}
+  metadata: {rationale: Crude 2-letter code via truncate+upper to demonstrate truncate.
+      For authoritative codes use an enum_to_enum lookup instead (see example 05).}
+```
+
 ## Running it
 
 ```bash
 ../../../harmonization-framework/venv/bin/python build_rules.py
 ../../../harmonization-framework/venv/bin/python run_python.py
+../../../harmonization-framework/venv/bin/python run_yaml.py   # same, from rules.yaml
 bash run_cli.sh
 ```
 

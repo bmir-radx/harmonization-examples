@@ -1,15 +1,22 @@
 # 05 — Enums & Lookups
 
-Mapping coded values to a target vocabulary, and the strict-vs-lenient decision
-in depth.
+Much of harmonization is translation: a source uses codes (`A`, `5`, `web`) and
+the target schema wants labels (`active`, `very_satisfied`, `digital`). The
+`enum_to_enum` primitive is the lookup table that does this. The decision
+attached to it is what should happen to a value that *isn't* in the table. This
+example maps three survey columns and applies that decision both ways — using
+one column strict and lenient — so the trade-off is visible side by side.
 
 ## What it teaches
 
-- `enum_to_enum` — the lookup-table primitive.
-- `cast` — type coercion (int → boolean).
-- **`strict=True` vs. `strict=False` + `default`**, side by side on one column.
-- That **integer-keyed maps round-trip safely** — you can key a map by integers
-  and map them to string labels with no special handling.
+- **Lookups with `enum_to_enum`.** The core code → label primitive.
+- **Strict vs. lenient, side by side.** `strict=True` (raise on an unknown code)
+  versus `strict=False` + a `default` (coerce and keep going) — both applied to
+  the same column so the contrast is concrete.
+- **Type coercion with `cast`.** A true binary (`0`/`1`) becomes a native
+  boolean without a lookup table.
+- **Integer-keyed maps round-trip safely.** You can key a map by integers and
+  map them to string labels with no special handling.
 
 ## The data
 
@@ -37,7 +44,7 @@ Row R4's `channel = kiosk`:
 - `channel_group` → `other` (lenient default keeps the import running).
 - `channel_strict` → `self_service` (it *is* mapped here, so it succeeds).
 
-If a value were outside a **strict** map, it raises:
+If a value were outside a **strict** map, it raises an error:
 
 ```python
 EnumToEnum({"web": "digital", "phone": "assisted", "kiosk": "self_service"},
@@ -67,11 +74,184 @@ so its type is preserved (`1` stays the integer `1`). No `cast(int→text)` is
 needed. (Examples 06 and 08 rely on the same property to feed a one-hot integer
 index straight into `enum_to_enum`.)
 
+## The rules, serialized
+
+The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+
+`rules.json`:
+
+```json
+[
+  {
+    "sources": [
+      "satisfaction"
+    ],
+    "target": "satisfaction_label",
+    "operations": [
+      {
+        "operation": "enum_to_enum",
+        "mapping": [
+          {
+            "from": 1,
+            "to": "very_dissatisfied"
+          },
+          {
+            "from": 2,
+            "to": "dissatisfied"
+          },
+          {
+            "from": 3,
+            "to": "neutral"
+          },
+          {
+            "from": 4,
+            "to": "satisfied"
+          },
+          {
+            "from": 5,
+            "to": "very_satisfied"
+          }
+        ],
+        "strict": false,
+        "default": "unknown"
+      }
+    ],
+    "metadata": {
+      "rationale": "Likert int -> label, keyed by integers (the serialized form preserves key type, so no cast is needed); lenient with default='unknown' for out-of-range codes."
+    }
+  },
+  {
+    "sources": [
+      "recommend"
+    ],
+    "target": "would_recommend",
+    "operations": [
+      {
+        "operation": "cast",
+        "source": "integer",
+        "target": "boolean"
+      }
+    ],
+    "metadata": {
+      "rationale": "0/1 flag -> native boolean via cast; no lookup table required for a true binary."
+    }
+  },
+  {
+    "sources": [
+      "channel"
+    ],
+    "target": "channel_group",
+    "operations": [
+      {
+        "operation": "enum_to_enum",
+        "mapping": [
+          {
+            "from": "web",
+            "to": "digital"
+          },
+          {
+            "from": "phone",
+            "to": "assisted"
+          }
+        ],
+        "strict": false,
+        "default": "other"
+      }
+    ],
+    "metadata": {
+      "rationale": "Open-ended channel vocabulary: map the known set, coerce the rest to 'other' rather than failing."
+    }
+  },
+  {
+    "sources": [
+      "channel"
+    ],
+    "target": "channel_strict",
+    "operations": [
+      {
+        "operation": "enum_to_enum",
+        "mapping": [
+          {
+            "from": "web",
+            "to": "digital"
+          },
+          {
+            "from": "phone",
+            "to": "assisted"
+          },
+          {
+            "from": "kiosk",
+            "to": "self_service"
+          }
+        ],
+        "strict": true
+      }
+    ],
+    "metadata": {
+      "rationale": "Contrast to channel_group: strict mapping that raises on any unknown code. Use when the vocabulary is a hard contract and an unexpected value must halt the import."
+    }
+  }
+]
+```
+
+`rules.yaml`:
+
+```yaml
+- sources: [satisfaction]
+  target: satisfaction_label
+  operations:
+  - operation: enum_to_enum
+    mapping:
+    - {from: 1, to: very_dissatisfied}
+    - {from: 2, to: dissatisfied}
+    - {from: 3, to: neutral}
+    - {from: 4, to: satisfied}
+    - {from: 5, to: very_satisfied}
+    strict: false
+    default: unknown
+  metadata: {rationale: 'Likert int -> label, keyed by integers (the serialized form
+      preserves key type, so no cast is needed); lenient with default=''unknown''
+      for out-of-range codes.'}
+
+- sources: [recommend]
+  target: would_recommend
+  operations:
+  - {operation: cast, source: integer, target: boolean}
+  metadata: {rationale: 0/1 flag -> native boolean via cast; no lookup table required
+      for a true binary.}
+
+- sources: [channel]
+  target: channel_group
+  operations:
+  - operation: enum_to_enum
+    mapping:
+    - {from: web, to: digital}
+    - {from: phone, to: assisted}
+    strict: false
+    default: other
+  metadata: {rationale: 'Open-ended channel vocabulary: map the known set, coerce
+      the rest to ''other'' rather than failing.'}
+
+- sources: [channel]
+  target: channel_strict
+  operations:
+  - operation: enum_to_enum
+    mapping:
+    - {from: web, to: digital}
+    - {from: phone, to: assisted}
+    - {from: kiosk, to: self_service}
+    strict: true
+  metadata: {rationale: 'Contrast to channel_group: strict mapping that raises on
+      any unknown code. Use when the vocabulary is a hard contract and an unexpected
+      value must halt the import.'}
+```
+
 ## Running it
 
 ```bash
 ../../../harmonization-framework/venv/bin/python build_rules.py
 ../../../harmonization-framework/venv/bin/python run_python.py
+../../../harmonization-framework/venv/bin/python run_yaml.py   # same, from rules.yaml
 bash run_cli.sh
 ```
 

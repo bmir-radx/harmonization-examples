@@ -1,16 +1,20 @@
 # 02 — Units & Numbers
 
-Numeric harmonization, with one big lesson: **the order of operations in a rule
-changes the result.**
+This example harmonizes a few mixed-unit vital signs, introducing the numeric
+primitives: unit conversion, scaling, rounding, formatting, clamping, and
+binning. Several rules chain two of these, where the order is chosen for a
+reason — converting at full precision before rounding for display, for instance
+— and each rule's rationale records that choice.
 
 ## What it teaches
 
-- `convert_units` — unit conversion via `pint` (inches → cm).
-- `scale` — multiply by a factor (lb → kg).
-- `round` vs. `format_number` — round keeps a number; format_number pins a
-  presentation **string** with fixed decimals.
-- `threshold` — clamp values into a valid range.
-- `bin` — bucket a numeric value into labeled bands (requires integer bounds).
+- **Unit conversion and scaling.** `convert_units` converts between real units
+  (inches → cm), and `scale` multiplies by a factor (lb → kg).
+- **Rounding vs. formatting.** `round` keeps a *number* with fewer decimals;
+  `format_number` pins a presentation *string* with fixed decimals — a display
+  contract, not a numeric one.
+- **Clamping and binning.** `threshold` forces a value into a valid range, and
+  `bin` buckets a numeric value into labelled bands (with integer bounds).
 
 ## The data
 
@@ -19,30 +23,165 @@ changes the result.**
 
 ## The harmonization choices (and why)
 
-| Source | Target | Pipeline | Why this order |
-|--------|--------|----------|----------------|
+| Source | Target | Pipeline | Why |
+|--------|--------|----------|-----|
 | `height_in` | `height_cm` | `convert_units(inch→cm)` → `round(1)` | Convert at full precision **first**, round for display **second**. Rounding inches first would amplify error when scaled up. |
 | `weight_lb` | `weight_kg` | `scale(0.45359237)` → `format_number(2)` | Scale to kg, then pin a 2-decimal **string** (`"23.59"`). `format_number` last because it's a display contract, and it returns a string. |
 | `oxygen_saturation` | `spo2_clamped` | `threshold(0, 100)` | SpO2 can't exceed 100%; `101` is a sensor artifact. Clamp deterministically rather than dropping the row. |
 | `age` | `age_band` | `bin(child/adolescent/adult/older_adult)` | Inclusive, non-overlapping integer ranges tiling 0..120 so every age lands in exactly one band. |
-
-### Why order matters — a concrete contrast
-
-`convert_units → round` gives `48.5 in → 123.2 cm`. Swap them and you'd round
-`48.5` (no change here) but in general you'd round the *input unit* and lose
-precision the conversion then magnifies. The rule pipeline is ordered for a
-reason; each example states that reason in the rule's `metadata.rationale`.
 
 ### Notable result
 
 Subject `S3` has `oxygen_saturation = 101`, which `threshold(0, 100)` clamps to
 `100.0` in `spo2_clamped` — a visible, auditable correction.
 
+## The rules, serialized
+
+The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+
+`rules.json`:
+
+```json
+[
+  {
+    "sources": [
+      "height_in"
+    ],
+    "target": "height_cm",
+    "operations": [
+      {
+        "operation": "convert_units",
+        "source_unit": "inch",
+        "target_unit": "cm"
+      },
+      {
+        "operation": "round",
+        "precision": 1
+      }
+    ],
+    "metadata": {
+      "rationale": "Convert at full precision, then round. Rounding before the conversion would amplify rounding error."
+    }
+  },
+  {
+    "sources": [
+      "weight_lb"
+    ],
+    "target": "weight_kg",
+    "operations": [
+      {
+        "operation": "scale",
+        "scaling_factor": 0.45359237
+      },
+      {
+        "operation": "format_number",
+        "precision": 2
+      }
+    ],
+    "metadata": {
+      "rationale": "Scale to kg, then FormatNumber(2) to pin a stable 2-decimal string for display/export."
+    }
+  },
+  {
+    "sources": [
+      "oxygen_saturation"
+    ],
+    "target": "spo2_clamped",
+    "operations": [
+      {
+        "operation": "threshold",
+        "lower": 0.0,
+        "upper": 100.0
+      }
+    ],
+    "metadata": {
+      "rationale": "SpO2 > 100% is physically impossible (sensor artifact); clamp to [0,100] deterministically instead of dropping the row."
+    }
+  },
+  {
+    "sources": [
+      "age"
+    ],
+    "target": "age_band",
+    "operations": [
+      {
+        "operation": "bin",
+        "bins": [
+          {
+            "label": "child",
+            "start": 0,
+            "end": 12
+          },
+          {
+            "label": "adolescent",
+            "start": 13,
+            "end": 17
+          },
+          {
+            "label": "adult",
+            "start": 18,
+            "end": 64
+          },
+          {
+            "label": "older_adult",
+            "start": 65,
+            "end": 120
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "rationale": "Coarse life-stage bands with inclusive, non-overlapping integer ranges covering 0..120."
+    }
+  }
+]
+```
+
+`rules.yaml`:
+
+```yaml
+- sources: [height_in]
+  target: height_cm
+  operations:
+  - {operation: convert_units, source_unit: inch, target_unit: cm}
+  - {operation: round, precision: 1}
+  metadata: {rationale: 'Convert at full precision, then round. Rounding before the
+      conversion would amplify rounding error.'}
+
+- sources: [weight_lb]
+  target: weight_kg
+  operations:
+  - {operation: scale, scaling_factor: 0.45359237}
+  - {operation: format_number, precision: 2}
+  metadata: {rationale: 'Scale to kg, then FormatNumber(2) to pin a stable 2-decimal
+      string for display/export.'}
+
+- sources: [oxygen_saturation]
+  target: spo2_clamped
+  operations:
+  - {operation: threshold, lower: 0.0, upper: 100.0}
+  metadata: {rationale: 'SpO2 > 100% is physically impossible (sensor artifact); clamp
+      to [0,100] deterministically instead of dropping the row.'}
+
+- sources: [age]
+  target: age_band
+  operations:
+  - operation: bin
+    bins:
+    - {label: child, start: 0, end: 12}
+    - {label: adolescent, start: 13, end: 17}
+    - {label: adult, start: 18, end: 64}
+    - {label: older_adult, start: 65, end: 120}
+  metadata: {rationale: 'Coarse life-stage bands with inclusive, non-overlapping integer
+      ranges covering 0..120.'}
+```
+
 ## Running it
 
 ```bash
-../../../harmonization-framework/venv/bin/python build_rules.py   # regenerate rules.json
+../../../harmonization-framework/venv/bin/python build_rules.py   # regenerate rules.json + rules.yaml
 ../../../harmonization-framework/venv/bin/python run_python.py     # run + assert golden output
+../../../harmonization-framework/venv/bin/python run_yaml.py       # same, loading rules.yaml
 bash run_cli.sh                                                    # CLI (target columns only)
 ```
 

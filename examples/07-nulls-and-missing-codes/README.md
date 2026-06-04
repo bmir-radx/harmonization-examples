@@ -16,7 +16,7 @@ together mean a blank cell in produces a blank cell out with no effort on your
 part.
 
 The catch is that not every "missing" value arrives as an empty field. Source
-systems often fill the gap with a *missing-value code* instead — a magic in-band
+systems often fill the gap with a *missing-value code* instead — an in-band
 value like `UNK` in a text column or `-999` in a numeric one. To a person these
 read as "we don't have this," but to pandas they are perfectly ordinary strings
 and numbers. They are *not* nulls, nothing protects them, and they flow through
@@ -191,17 +191,135 @@ Use `error` when a missing column means the input is malformed and you'd rather
 stop than produce a partial result; use `warn` when sources legitimately vary
 and you want the rest of the harmonization to proceed regardless.
 
+## The rules, serialized
+
+The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+
+`rules.json`:
+
+```json
+[
+  {
+    "sources": [
+      "result"
+    ],
+    "target": "result_clean",
+    "operations": [
+      {
+        "operation": "enum_to_enum",
+        "mapping": [
+          {
+            "from": "pos",
+            "to": "positive"
+          },
+          {
+            "from": "neg",
+            "to": "negative"
+          },
+          {
+            "from": "UNK",
+            "to": null
+          }
+        ],
+        "strict": false,
+        "default": "unexpected"
+      }
+    ],
+    "metadata": {
+      "rationale": "Missing-value code 'UNK' -> null by mapping it explicitly alongside the real vocabulary; default flags only truly unexpected codes. (No null_if primitive exists.)"
+    }
+  },
+  {
+    "sources": [
+      "score"
+    ],
+    "target": "score_x10",
+    "operations": [
+      {
+        "operation": "scale",
+        "scaling_factor": 10
+      }
+    ],
+    "metadata": {
+      "rationale": "Genuine NaN passes through @handle_null unchanged; a blank input cell yields a blank output cell."
+    }
+  },
+  {
+    "sources": [
+      "reading_lb"
+    ],
+    "target": "reading_kg",
+    "operations": [
+      {
+        "operation": "missing_code",
+        "codes": [
+          {
+            "code": -999,
+            "label": "not_measured"
+          }
+        ]
+      },
+      {
+        "operation": "scale",
+        "scaling_factor": 0.45359237
+      }
+    ],
+    "metadata": {
+      "rationale": "Numeric missing-value code -999 -> null via missing_code (identity-preserving: other readings pass through), then Scale passes the null through. The label is reported to the replay log."
+    }
+  }
+]
+```
+
+`rules.yaml`:
+
+```yaml
+- sources: [result]
+  target: result_clean
+  operations:
+  - operation: enum_to_enum
+    mapping:
+    - {from: pos, to: positive}
+    - {from: neg, to: negative}
+    - {from: UNK, to: null}
+    strict: false
+    default: unexpected
+  metadata: {rationale: Missing-value code 'UNK' -> null by mapping it explicitly
+      alongside the real vocabulary; default flags only truly unexpected codes. (No
+      null_if primitive exists.)}
+
+- sources: [score]
+  target: score_x10
+  operations:
+  - {operation: scale, scaling_factor: 10}
+  metadata: {rationale: Genuine NaN passes through @handle_null unchanged; a blank
+      input cell yields a blank output cell.}
+
+- sources: [reading_lb]
+  target: reading_kg
+  operations:
+  - operation: missing_code
+    codes:
+    - {code: -999, label: not_measured}
+  - {operation: scale, scaling_factor: 0.45359237}
+  metadata: {rationale: 'Numeric missing-value code -999 -> null via missing_code
+      (identity-preserving: other readings pass through), then Scale passes the null
+      through. The label is reported to the replay log.'}
+```
+
 ## Running it
 
-Run either variant — they both consume the same `rules.json`, so the
-results match:
+Run any variant — they all consume the same rules, so the results match:
 
 ```bash
-# Rebuild rules.json from build_rules.py (the source of truth):
+# Rebuild rules.json AND rules.yaml from build_rules.py:
 ../../../harmonization-framework/venv/bin/python build_rules.py
 
 # Python API — also runs the golden self-check against expected_output.csv:
 ../../../harmonization-framework/venv/bin/python run_python.py
+
+# Same, loading rules.yaml instead of rules.json:
+../../../harmonization-framework/venv/bin/python run_yaml.py
 
 # CLI variant:
 bash run_cli.sh
