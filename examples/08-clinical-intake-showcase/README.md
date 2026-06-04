@@ -68,12 +68,11 @@ every key.)
 ../../../harmonization-framework/venv/bin/python build_rules.py
 ../../../harmonization-framework/venv/bin/python run_python.py   # run + assert
 bash run_cli.sh
-node client.ts                                                   # start the sidecar first
 ```
 
 ## Expected output
 
-`expected_output.csv` (Python / sidecar — all columns) ends with the harmonized
+`expected_output.csv` (Python API — all columns) ends with the harmonized
 fields:
 
 ```

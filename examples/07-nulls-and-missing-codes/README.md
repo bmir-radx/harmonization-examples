@@ -193,7 +193,7 @@ and you want the rest of the harmonization to proceed regardless.
 
 ## Running it
 
-Run any of the three variants — they all consume the same `rules.json`, so the
+Run either variant — they both consume the same `rules.json`, so the
 results match:
 
 ```bash
@@ -205,9 +205,6 @@ results match:
 
 # CLI variant:
 bash run_cli.sh
-
-# RPC variant (start the sidecar first):
-node client.ts
 ```
 
 ## Expected output

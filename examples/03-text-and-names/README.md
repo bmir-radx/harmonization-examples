@@ -51,7 +51,6 @@ The example includes this on purpose so the contrast is explicit.
 ../../../harmonization-framework/venv/bin/python build_rules.py
 ../../../harmonization-framework/venv/bin/python run_python.py
 bash run_cli.sh
-node client.ts   # start the sidecar first
 ```
 
 ## Expected output

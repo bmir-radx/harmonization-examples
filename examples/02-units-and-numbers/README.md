@@ -44,12 +44,11 @@ Subject `S3` has `oxygen_saturation = 101`, which `threshold(0, 100)` clamps to
 ../../../harmonization-framework/venv/bin/python build_rules.py   # regenerate rules.json
 ../../../harmonization-framework/venv/bin/python run_python.py     # run + assert golden output
 bash run_cli.sh                                                    # CLI (target columns only)
-node client.ts                                                     # RPC sidecar (start it first)
 ```
 
 ## Expected output
 
-`expected_output.csv` (Python API / sidecar — all columns):
+`expected_output.csv` (Python API — all columns):
 
 ```
 subject_id,age,height_in,weight_lb,oxygen_saturation,height_cm,weight_kg,spo2_clamped,age_band,source dataset,original_id
