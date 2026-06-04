@@ -1,20 +1,34 @@
 # 01 — Hello Harmonization
 
-The smallest complete harmonization. Start here.
+The smallest complete example in the suite, and the place to meet the
+framework's core model: two source columns become two target columns, run two
+ways. Everything later builds on the pieces introduced here.
+
+The model is small. You describe a mapping as a set of **rules**. Each rule
+takes one or more **source** columns and produces a single **target** column by
+running the source value through an ordered list of **primitive operations** —
+small, named transformations like "look this code up in a table" or "carry it
+across unchanged." A collection of rules is a **RuleSet**, which you build in
+Python and save to a file called `rules.json`. That file is the single source of
+truth: both the Python API and the command-line tool read the *same*
+`rules.json`, so the mapping you write once runs identically through both.
 
 ## What it teaches
 
-- A **rule** maps source column(s) → one target column via an ordered list of
-  **primitive operations**.
-- A **RuleSet** is a collection of rules you build in Python and `save()` to
-  JSON; the CLI and sidecar then consume that JSON.
-- Two foundational primitives:
-  - `DoNothing` — carry a column across unchanged (effectively a rename).
-  - `EnumToEnum` — a lookup table from source codes to target labels.
+- **The rule model.** A rule maps source column(s) → one target column through
+  an ordered list of primitive operations. This is the unit you compose
+  everything else from.
+- **Two foundational primitives.** `do_nothing` carries a column across
+  unchanged (effectively a rename), and `enum_to_enum` looks source codes up in
+  a table to produce target labels.
+- **One source of truth, two ways to run it.** A `RuleSet` saved to `rules.json`
+  is consumed unchanged by both the Python API and the CLI — so the rules are
+  written and tested once, not twice.
 
 ## The data
 
-`input.csv`:
+`input.csv` is a tiny participant roster with a clean name column and a coded
+status column:
 
 | participant_id | full_name | status_code |
 |----------------|-----------|-------------|
@@ -23,61 +37,101 @@ The smallest complete harmonization. Start here.
 | P003 | Grace Hopper | P |
 | P004 | Katherine Johnson | A |
 
+We want two harmonized columns out of it: a `name` (the same value, under the
+canonical column name) and a `status` (the single-letter code expanded to a
+readable label).
+
 ## The harmonization choices (and why)
 
-| Target | Source | Operations | Why this choice |
+| Source | Target | Operations | Why this choice |
 |--------|--------|-----------|-----------------|
-| `name` | `full_name` | `do_nothing` | The source is already clean. We only want the canonical column name, so a no-op transformation documents "carry across, no change" explicitly. |
-| `status` | `status_code` | `enum_to_enum` | Codes are controlled but data entry is imperfect. We use `strict=False` with `default="unknown"` so an unexpected code maps to a *visible* `"unknown"` rather than crashing the batch or leaving an ambiguous blank cell. |
+| `full_name` | `name` | `do_nothing` | The source is already clean; we only want it under the canonical column name. |
+| `status_code` | `status` | `enum_to_enum` | Expand controlled codes to readable labels, with a visible fallback for anything unexpected. |
 
-The reasoning is also recorded in each rule's `metadata.rationale`, so it
+### Rule 1 — carry a column across unchanged
+
+`full_name` already holds exactly the value we want; it just needs to land in a
+target column called `name`. The `do_nothing` primitive expresses precisely
+that: "carry this across, no transformation." You could express the same thing
+with an empty list of operations, but a `do_nothing` says the intent out loud —
+*this column is deliberately passed through* — and shows up as a visible
+operation in `rules.json` rather than an absence someone might mistake for an
+oversight.
+
+### Rule 2 — map codes to labels
+
+`status_code` uses single-letter codes (`A`/`I`/`P`) that the target schema
+wants as full words. `enum_to_enum` is a lookup table: it maps each known code
+to its label (`A → active`, `I → inactive`, `P → pending`). The interesting
+decision is what happens to a code that *isn't* in the table. Two behaviours are
+available:
+
+- **Strict** — raise an error on any unknown code. Fail fast; good when the code
+  set is guaranteed and a surprise should halt the run.
+- **Lenient + default** — map unknown codes to a chosen fallback value and keep
+  going.
+
+This example chooses **lenient** with `default="unknown"`. Real intake data
+drifts — a new status code shows up that nobody warned you about — and we'd
+rather surface that as a *visible* `"unknown"` than crash the whole batch or
+emit a blank cell that could mean several things. (Example 05 explores the
+strict-vs-lenient trade-off in depth.)
+
+The reasoning for each rule is also recorded in its `metadata.rationale`, so it
 survives into `rules.json` and travels with the rule.
 
-> **Design note — strict vs. lenient mapping.** `strict=True` would raise on an
-> unknown code (fail fast, good when codes are guaranteed). We chose lenient +
-> explicit default here because real intake data drifts. Example 05 explores
-> this trade-off directly.
+## One source of truth, two ways to run it
 
-## Running it (three interfaces, one source of truth)
+`build_rules.py` is the only place the rules are defined. Running it writes
+`rules.json`, and that file is the contract both interfaces read:
 
 ```bash
 # 0. (Re)generate rules.json from the Python source of truth:
 ../../../harmonization-framework/venv/bin/python build_rules.py
 
-# 1. Python API — harmonizes and asserts against expected_output.csv:
+# 1. Python API — harmonizes and checks the result against expected_output.csv:
 ../../../harmonization-framework/venv/bin/python run_python.py
 
-# 2. CLI — same rules.json, target columns only:
+# 2. CLI — same rules.json, no Python needed:
 bash run_cli.sh
-
-# 3. RPC sidecar — start the sidecar, then:
-node client.ts
 ```
+
+Because both read the same `rules.json`, the mapping behaves the same way
+whichever you use. There is one intentional difference in *output shape*: the
+Python API returns every input column plus the new targets, while the CLI
+returns only the target columns (add `--include-metadata` to also get the
+`source dataset` / `original_id` columns). Same rules, same values — the
+interfaces just differ in how much of the input they echo back.
 
 ## Expected output
 
-`expected_output.csv` (produced by the **Python API** and the **sidecar** — all
-input columns plus the targets plus metadata):
+The Python API produces the full output — all input columns, the two new
+targets, and metadata:
 
 ```
 participant_id,full_name,status_code,name,status,source dataset,original_id
 P001,Ada Lovelace,A,Ada Lovelace,active,hello,0
-...
+P002,Alan Turing,I,Alan Turing,inactive,hello,1
+P003,Grace Hopper,P,Grace Hopper,pending,hello,2
+P004,Katherine Johnson,A,Katherine Johnson,active,hello,3
 ```
 
-The **CLI** instead emits only the target columns (`name`, `status`), plus
-`source dataset`/`original_id` when `--include-metadata` is passed:
+The CLI emits only the targets (plus metadata when `--include-metadata` is
+passed):
 
 ```
 name,status,source dataset,original_id
 Ada Lovelace,active,hello,0
-...
+Alan Turing,inactive,hello,1
+Grace Hopper,pending,hello,2
+Katherine Johnson,active,hello,3
 ```
 
-This column-set difference between interfaces is intentional in the framework.
+`run_python.py` asserts its output against the committed `expected_output.csv`,
+so the example checks itself.
 
 ## Generated files (not committed)
 
-`output.csv`, `output_cli.csv`, `output_rpc.csv`, `replay.log` are produced when
-you run the example. The committed artifacts are `input.csv`, `rules.json`, and
+`output.csv`, `output_cli.csv`, and `replay.log` are produced when you run the
+example. The committed artifacts are `input.csv`, `rules.json`, and
 `expected_output.csv`.
