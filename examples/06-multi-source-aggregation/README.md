@@ -70,7 +70,14 @@ malformed cell raises an error instead of yielding garbage.
 
 ## The rules, serialized
 
-The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+As in example 01, the saved file *is* the mapping, and the same rule set
+serializes to JSON (the default) or YAML — the extension decides which, and
+both load identically. Shown in both formats below.
+
+Worth noticing here is how a multi-source rule is written out: the `sources`
+list holds more than one column, and the `reduce` and `enum_to_enum` operations
+chain in order, so the file records both which columns are combined and how the
+combined index is turned into a label.
 
 `rules.json`:
 

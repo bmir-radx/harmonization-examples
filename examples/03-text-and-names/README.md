@@ -55,7 +55,14 @@ The example includes this on purpose so the contrast is explicit.
 
 ## The rules, serialized
 
-The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+As in example 01, the saved file *is* the mapping, and the same rule set
+serializes to JSON (the default) or YAML — the extension decides which, and
+both load identically. Shown in both formats below.
+
+Worth noticing here is how the text primitives chain: `normalize_text`,
+`substitute`, and `truncate` appear as an ordered list of operations on a
+single rule, each with its own parameters, so the file records both the
+sequence and the exact settings (which substitutions, what length limit).
 
 `rules.json`:
 

@@ -79,7 +79,15 @@ every key.)
 
 ## The rules, serialized
 
-The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+As in example 01, the saved file *is* the mapping, and the same rule set
+serializes to JSON (the default) or YAML — the extension decides which, and
+both load identically. Shown in both formats below.
+
+Worth noticing here is how a realistic, multi-rule mapping looks once written
+out: every primitive this suite has covered — dates, units, text, lookups,
+aggregation — sits side by side in one file, each rule carrying its own
+operations and `metadata.rationale`. This is what a complete harmonization
+looks like as a single reviewable artifact.
 
 `rules.json`:
 

@@ -176,7 +176,14 @@ and you want the rest of the harmonization to proceed regardless.
 
 ## The rules, serialized
 
-The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+As in example 01, the saved file *is* the mapping, and the same rule set
+serializes to JSON (the default) or YAML — the extension decides which, and
+both load identically. Shown in both formats below.
+
+Worth noticing here is how `missing_code` records the set of sentinel values it
+nulls, so the file states exactly which codes are treated as missing — the
+decision is captured in the rules rather than buried in code or applied
+silently.
 
 `rules.json`:
 

@@ -37,7 +37,14 @@ Subject `S3` has `oxygen_saturation = 101`, which `threshold(0, 100)` clamps to
 
 ## The rules, serialized
 
-The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+As in example 01, the saved file *is* the mapping, and the same rule set
+serializes to JSON (the default) or YAML — the extension decides which, and
+both load identically. Shown in both formats below.
+
+Worth noticing here is how the numeric primitives look once written out: each
+`convert_units`, `scale`, `round`, `bin`, `threshold`, and `format_number`
+records its parameters inline, so the file states exactly which conversion
+factor, how many decimals, or which bin edges were used.
 
 `rules.json`:
 

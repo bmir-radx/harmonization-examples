@@ -83,7 +83,24 @@ survives into `rules.json` and travels with the rule.
 
 ## The rules, serialized
 
-The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+A `RuleSet` is not only something you build in Python — it is saved to a file,
+and that file *is* the mapping. It is what the Python API reloads, what the CLI
+reads, and what you would commit, review, or hand to someone else. So it is
+worth seeing what the rules you wrote above actually look like once written
+out, because this file — not the Python that produced it — is the portable,
+shareable artifact.
+
+The same rule set serializes to two formats. JSON is the default; YAML is
+offered because it is easier to read and edit by hand. `RuleSet.save()` and
+`load()` (and the CLI's `--rules`) pick the format from the file extension
+(`.yaml`/`.yml` for YAML, otherwise JSON), and both load to exactly the same
+rules — the choice is purely about which you would rather look at.
+
+Reading either one back, you can see the structure described above made
+concrete: a list of rules, each with its `sources`, `target`, ordered
+`operations`, and the `metadata.rationale` carried along. The `enum_to_enum`
+lookup table, the `strict: false` / `default: unknown` choice — every decision
+from the section above is right there in the file.
 
 `rules.json`:
 

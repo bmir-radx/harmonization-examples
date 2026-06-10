@@ -75,7 +75,14 @@ index straight into `enum_to_enum`.)
 
 ## The rules, serialized
 
-The full rule set for this example, in both formats. `RuleSet.save()` and `load()` (and the CLI's `--rules`) pick the format from the file extension (`.yaml`/`.yml` for YAML, otherwise JSON), and both load identically.
+As in example 01, the saved file *is* the mapping, and the same rule set
+serializes to JSON (the default) or YAML — the extension decides which, and
+both load identically. Shown in both formats below.
+
+Worth noticing here is how `enum_to_enum` writes its lookup table out as a list
+of `{from, to}` entries. That entry-list form preserves the type of each key,
+so the integer-keyed mapping in this example round-trips as integers rather
+than being coerced to strings on save and reload.
 
 `rules.json`:
 
