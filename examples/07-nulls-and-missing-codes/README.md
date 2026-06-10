@@ -5,7 +5,8 @@ say "this value is missing." The closest it has is an **empty field** — nothin
 between two commas (`...,neg,,160.0,...`). A blank field reads as a genuine null,
 and the framework handles these for you: a null passes through scalar transforms
 unchanged, so a blank cell in produces a blank cell out with no effort on your
-part. (Null semantics are spelled out in *Verified null semantics* below.)
+part. (Null semantics are spelled out in *How the framework treats a real null*
+below.)
 
 The catch is that not every "missing" value arrives as an empty field. Source
 systems often fill the gap with a *missing-value code* instead — an in-band
