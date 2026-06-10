@@ -4,10 +4,7 @@
     <marker id="diamond" viewBox="0 0 20 12" refX="1" refY="6" markerWidth="20" markerHeight="12" orient="auto">
       <path d="M1,6 L10,1 L19,6 L10,11 z" fill="#ffffff" stroke="#475569" stroke-width="1.3"/>
     </marker>
-    <!-- hollow triangle for generalization (inheritance); tip sits flush at the line end -->
-    <marker id="triangle" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" orient="auto">
-      <path d="M1,1 L13,7 L1,13 z" fill="#ffffff" stroke="#475569" stroke-width="1.2" stroke-linejoin="round"/>
-    </marker>
+    <!-- (generalization triangles are drawn explicitly as paths, below) -->
     <style>
       .box    { fill: #fffdf7; stroke: #94a3b8; stroke-width: 1.5; }
       .hdr    { fill: #e8eef7; stroke: #94a3b8; stroke-width: 1.5; }
@@ -59,13 +56,19 @@
   <text x="332" y="330" class="mult">0..*  {ordered}</text>
 
   <!-- generalizations: concrete primitives inherit PrimitiveOperation.
-       Each side is a single polyline: box -> shared trunk -> parent box, with
-       the trunk vertical centred at the parent's mid-height (y=367) so the two
-       subclass stubs meet it symmetrically and one triangle lands flush. -->
-  <!-- left tree (trunk at x=203) -->
-  <path d="M186 361 L203 361 L203 367 L220 367" class="assoc" marker-end="url(#triangle)"/>
-  <path d="M186 401 L203 401 L203 367" class="assoc"/>
-  <!-- right tree, mirrored (trunk at x=437) -->
-  <path d="M454 361 L437 361 L437 367 L420 367" class="assoc" marker-end="url(#triangle)"/>
-  <path d="M454 401 L437 401 L437 367" class="assoc"/>
+       Each side is a UML tree: both subclasses meet a shared vertical trunk,
+       and one hollow triangle (drawn explicitly) sits flush against the parent
+       box at its mid-height (y=367), pointing at it. -->
+
+  <!-- left tree: subclass stubs into trunk at x=196, then trunk -> triangle base -->
+  <path d="M186 361 L196 361 L196 401 L186 401" class="assoc"/>
+  <path d="M196 381 L204 381" class="assoc"/>
+  <!-- left triangle: base at x=204, tip flush on the box at x=221 -->
+  <path d="M204 374 L221 381 L204 388 z" fill="#ffffff" stroke="#475569" stroke-width="1.4" stroke-linejoin="round"/>
+
+  <!-- right tree, mirrored: trunk at x=444 -->
+  <path d="M454 361 L444 361 L444 401 L454 401" class="assoc"/>
+  <path d="M444 381 L436 381" class="assoc"/>
+  <!-- right triangle: base at x=436, tip flush on the box at x=419 -->
+  <path d="M436 374 L419 381 L436 388 z" fill="#ffffff" stroke="#475569" stroke-width="1.4" stroke-linejoin="round"/>
 </svg>
