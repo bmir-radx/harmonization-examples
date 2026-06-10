@@ -2,7 +2,7 @@
 Example 08 — Clinical Intake Showcase: run via the Python API and verify.
 
 Harmonizes a realistic, messy intake CSV and asserts the result matches the
-pinned golden output. See build_rules.py for the per-rule rationale, including
+pinned golden master. See build_rules.py for the per-rule rationale, including
 the one-hot consent reduction and the serialization-boundary type alignment.
 """
 

@@ -1,5 +1,5 @@
 """
-Example 02 — run via the Python API and verify against the golden output.
+Example 02 — run via the Python API and verify against the golden master.
 
 See build_rules.py for the rationale behind each numeric pipeline. As in
 example 01, the Python `harmonize_file` output keeps all input columns plus the

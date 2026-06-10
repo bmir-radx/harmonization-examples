@@ -327,7 +327,7 @@ bash run_cli.sh
 
 ## Expected output
 
-The annotated golden output below shows each case landing where the table
+The annotated golden master below shows each case landing where the table
 predicted: `UNK` blanked out, real blanks staying blank, and the numeric code
 `-999` turned into a clean blank `reading_kg` (with the hit recorded in the
 replay log) rather than a corrupted `-453.14`.

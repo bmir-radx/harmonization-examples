@@ -180,7 +180,7 @@ The full rule set for this example, in both formats. `RuleSet.save()` and `load(
 
 ```bash
 ../../../harmonization-framework/venv/bin/python build_rules.py   # regenerate rules.json + rules.yaml
-../../../harmonization-framework/venv/bin/python run_python.py     # run + assert golden output
+../../../harmonization-framework/venv/bin/python run_python.py     # run + assert golden master
 ../../../harmonization-framework/venv/bin/python run_yaml.py       # same, loading rules.yaml
 bash run_cli.sh                                                    # CLI (target columns only)
 ```
