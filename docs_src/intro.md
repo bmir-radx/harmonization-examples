@@ -19,7 +19,7 @@ comfortable reading a little Python and CSV.
 ## How to read this guide
 
 The chapters are meant to be read **in order**, starting with chapter 01. Each
-one is a small, self-contained example built around a single idea, and later
+one is small and self-contained, built around a single idea, and later
 chapters assume the ideas introduced earlier:
 
 - **01–04** build the foundations: the rule model, then numbers, text, and
@@ -34,7 +34,7 @@ doubles as a reference — each chapter is named for the primitives it covers.
 
 ## Before you start
 
-The examples run against the framework, which lives in a separate repository.
+The chapters run against the framework, which lives in a separate repository.
 Set both up as siblings:
 
 ```bash
@@ -48,7 +48,7 @@ python -m venv venv
 venv/bin/pip install -e .
 ```
 
-This produces the layout the examples expect:
+This produces the layout the chapters expect:
 
 ```
 parent/
@@ -76,7 +76,7 @@ and the rules:
 - **Expected output**, followed by a **Data files** view of the input and the
   golden master (rendered into this site from the committed CSV files).
 
-Every example is also a **self-checking test**: its output is pinned to a
+Every chapter is also a **self-checking test**: its output is pinned to a
 committed **golden master** — an approved reference output the run is checked
 against — so the code you read here is code that is known to work.
 
@@ -92,4 +92,4 @@ and produce the same result.
 ![Anatomy of a RuleSet: a RuleSet is an ordered list of rules; each rule maps source columns through a transformation of operations to a single target column.](assets/rule-model.svg)
 
 That's the whole model. Chapter 01 puts it to work on the smallest possible
-example — turn the page and start there.
+case — turn the page and start there.
