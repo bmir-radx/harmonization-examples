@@ -41,7 +41,7 @@
       }
     ],
     "metadata": {
-      "rationale": "Genuine NaN passes through @handle_null unchanged; a blank input cell yields a blank output cell."
+      "rationale": "A genuine null passes through `scale` unchanged; a blank input cell yields a blank output cell."
     }
   },
   {

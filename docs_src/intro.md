@@ -32,9 +32,39 @@ chapters assume the ideas introduced earlier:
 If you're returning to look something up, the chapter list in the sidebar
 doubles as a reference — each chapter is named for the primitives it covers.
 
+## Before you start
+
+The examples run against the framework, which lives in a separate repository.
+Set both up as siblings:
+
+```bash
+# in a common parent directory
+git clone <harmonization-framework repo>
+git clone <harmonization-examples repo>
+
+# build the framework's virtualenv
+cd harmonization-framework
+python -m venv venv
+venv/bin/pip install -e .
+```
+
+This produces the layout the examples expect:
+
+```
+parent/
+├── harmonization-framework/   # the framework + its venv/
+└── harmonization-examples/    # this repo
+```
+
+Every "Running it" command in the chapters uses this relative layout (for
+example `../../harmonization-framework/venv/bin/python`), so the two repositories
+need to sit side by side.
+
 ## What a chapter looks like
 
-Every chapter follows the same shape, so you always know where to look:
+Chapters share a common shape, so you generally know where to look. Most follow
+this order, and some add a short section explaining a concept between the data
+and the rules:
 
 - **An introduction** to the problem the chapter addresses.
 - **What it teaches** — the primitives and ideas in play.
@@ -43,8 +73,8 @@ Every chapter follows the same shape, so you always know where to look:
   it, not just the mechanics.
 - **The rules, serialized** — the complete rule set in both JSON and YAML.
 - **Running it** — the commands to reproduce the result yourself.
-- **Expected output** and a **Data files** view of the input and the golden
-  master.
+- **Expected output**, followed by a **Data files** view of the input and the
+  golden master (rendered into this site from the committed CSV files).
 
 Every example is also a **self-checking test**: its output is pinned to a
 committed **golden master** — an approved reference output the run is checked

@@ -2,33 +2,24 @@
 
 Most real datasets have some missing values, but a CSV has no built-in way to
 say "this value is missing." The closest it has is an **empty field** — nothing
-between two commas (`...,neg,,160.0,...`). When Python's pandas reads the file,
-an empty field in *any* column — text or numeric — is parsed as a missing
-value, which pandas represents with the marker `NaN` ("Not a Number," the
-floating-point value pandas reuses as its general "missing" marker for every
-column type, not just numbers). Turning the empty field into `NaN` is pandas'
-doing, not the harmonization framework's. But `NaN` is a real null — one of a
-few equivalent "missing" values the harmonization framework recognises (`NaN`,
-Python's own `None`, and pandas' `pd.NA`; see *Verified null semantics* below) —
-and it quietly protects them: its scalar transforms are wrapped so that a null is
-returned as-is instead of being fed through the transform. The two layers
-together mean a blank cell in produces a blank cell out with no effort on your
-part.
+between two commas (`...,neg,,160.0,...`). A blank field reads as a genuine null,
+and the framework handles these for you: a null passes through scalar transforms
+unchanged, so a blank cell in produces a blank cell out with no effort on your
+part. (Null semantics are spelled out in *Verified null semantics* below.)
 
 The catch is that not every "missing" value arrives as an empty field. Source
 systems often fill the gap with a *missing-value code* instead — an in-band
-value like `UNK` in a text column or `-999` in a numeric one. To a person these
-read as "we don't have this," but to pandas they are perfectly ordinary strings
-and numbers. They are *not* nulls, nothing protects them, and they flow through
-every transform and quietly corrupt the result. For example, a `-999` "missing"
-code in a pounds column scales right through a pounds-to-kilograms conversion
-and ends up in the output as `-453.14 kg` — a real-looking number that is pure
-garbage. A `UNK` in a category column survives a rename/standardisation step and
-shows up as its own bogus category, so a count of distinct results reports one
-too many. In both cases nothing errors out; the pipeline produces a clean,
-plausible answer that happens to be wrong. This example walks through both
-— how the harmonization framework handles real nulls for you, and what you have to do yourself
-about missing-value codes — using a small dataset that deliberately mixes the two.
+value like `UNK` in a text column or `-999` in a numeric one. These read as "we
+don't have this" to a person, but they are ordinary strings and numbers to the
+framework: not nulls, nothing protects them, and they flow through every
+transform and quietly corrupt the result. A `-999` code in a pounds column
+scales right through a pounds-to-kilograms conversion and lands in the output as
+`-453.14 kg` — a real-looking number that is pure garbage. A `UNK` in a category
+column survives a rename and shows up as its own bogus category, so a count of
+distinct results reports one too many. Nothing errors out; the pipeline produces
+a clean, plausible answer that happens to be wrong. This example walks through
+both — the nulls the framework handles for you, and the missing-value codes you
+have to handle yourself — using a small dataset that deliberately mixes the two.
 
 ## What it teaches
 
@@ -48,15 +39,7 @@ about missing-value codes — using a small dataset that deliberately mixes the 
 
 ## How the framework treats a real null
 
-A genuine null is any of three specific values — Python's `None`,
-floating-point `NaN`, or pandas' `pd.NA` — and the harmonization framework gives
-all three the same guarantee: when one reaches a scalar transform (`scale`,
-`round`, `cast`, …), the transform is skipped and the null is returned
-unchanged. So for a rule built only from scalar transforms, a missing input
-produces a missing output and you write no extra handling. The one place this
-guarantee does *not* hold is the aggregating primitives `reduce` and `map_each`,
-which raise on a missing element rather than passing it through. The three rules
-below state each part exactly:
+Three points pin down exactly how genuine nulls behave:
 
 **A null is one of three things.** When the framework asks "is this value
 missing?", it answers yes for exactly three forms: Python's `None`, the
@@ -241,7 +224,7 @@ The full rule set for this example, in both formats. `RuleSet.save()` and `load(
       }
     ],
     "metadata": {
-      "rationale": "Genuine NaN passes through @handle_null unchanged; a blank input cell yields a blank output cell."
+      "rationale": "A genuine null passes through `scale` unchanged; a blank input cell yields a blank output cell."
     }
   },
   {
@@ -292,8 +275,8 @@ The full rule set for this example, in both formats. `RuleSet.save()` and `load(
   target: score_x10
   operations:
   - {operation: scale, scaling_factor: 10}
-  metadata: {rationale: Genuine NaN passes through @handle_null unchanged; a blank
-      input cell yields a blank output cell.}
+  metadata: {rationale: A genuine null passes through `scale` unchanged; a blank input
+      cell yields a blank output cell.}
 
 - sources: [reading_lb]
   target: reading_kg

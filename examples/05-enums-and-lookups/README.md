@@ -44,12 +44,11 @@ Row R4's `channel = kiosk`:
 - `channel_group` → `other` (lenient default keeps the import running).
 - `channel_strict` → `self_service` (it *is* mapped here, so it succeeds).
 
-If a value were outside a **strict** map, it raises an error:
+If a value falls outside a **strict** map, the run stops with an error that
+names the offending value, rather than producing output:
 
-```python
-EnumToEnum({"web": "digital", "phone": "assisted", "kiosk": "self_service"},
-           strict=True).transform("mail")
-# KeyError: Missing mapping for value: mail
+```
+Missing mapping for value: mail
 ```
 
 Choose **strict** when the code set is guaranteed and an unexpected value must

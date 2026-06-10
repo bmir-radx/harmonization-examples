@@ -16,8 +16,8 @@
   target: score_x10
   operations:
   - {operation: scale, scaling_factor: 10}
-  metadata: {rationale: Genuine NaN passes through @handle_null unchanged; a blank
-      input cell yields a blank output cell.}
+  metadata: {rationale: A genuine null passes through `scale` unchanged; a blank input
+      cell yields a blank output cell.}
 
 - sources: [reading_lb]
   target: reading_kg

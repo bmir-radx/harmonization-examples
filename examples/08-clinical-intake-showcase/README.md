@@ -318,3 +318,27 @@ fields:
 
 Row 1004's `unmapped` visit type is the visible trace of the coerce-and-flag
 decision.
+
+## Where to go from here
+
+This was the last chapter. Across the guide you have seen the main families of
+primitives at work:
+
+- carrying a column across unchanged and renaming it, and mapping coded values
+  to canonical labels (chapters 01, 05);
+- numeric work — unit conversion, scaling, rounding, thresholds, and binning
+  (chapter 02);
+- text cleanup — substitution, normalisation, and truncation (chapter 03);
+- date parsing, with the choice between failing and coercing (chapter 04);
+- aggregating several source columns into one (chapter 06);
+- and distinguishing genuine nulls from missing-value codes (chapter 07).
+
+The recurring theme is that each rule is a decision, not just a transformation:
+when to fail on bad input versus quietly fix it, when to keep a type stable, and
+when to surface an anomaly rather than hide it. Every chapter records that
+reasoning in each rule's `metadata`, so the rule set explains itself.
+
+To go further, build a rule set of your own against a file you actually have:
+start from the example closest to your problem, copy its `build_rules.py`, and
+adapt the rules. The framework's own documentation lists the complete set of
+primitives and their parameters.

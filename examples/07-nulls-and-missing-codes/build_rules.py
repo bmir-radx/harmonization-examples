@@ -5,10 +5,9 @@ How the framework treats missing data, and how to handle the "fake nulls"
 (missing-value codes) that pollute real datasets.
 
 Verified null semantics:
-  - `isnull` recognises None, float('nan'), and pd.NA — scalars only.
-  - Most scalar primitives are wrapped with @handle_null, so a genuine null
-    PASSES THROUGH unchanged (scale, round, cast, enum_to_enum's input, ...).
-  - A blank CSV cell reads as NaN and therefore passes through untouched.
+  - A genuine null (None, float('nan'), or pd.NA) PASSES THROUGH most scalar
+    primitives unchanged (scale, round, cast, enum_to_enum's input, ...).
+  - A blank CSV cell reads as a null and therefore passes through untouched.
 
 The real trap is MISSING-VALUE CODES — `UNK`, `-999`, `N/A` — which are NOT null
 to pandas. They are ordinary values that flow through transforms and corrupt
@@ -67,16 +66,16 @@ def build() -> RuleSet:
     )
 
     # --- score -> score_x10 (genuine null PASS-THROUGH) ---------------------
-    # `score` has genuine blank cells (rows N2, N4) which pandas reads as NaN.
-    # Scale is @handle_null, so NaN passes straight through: the output stays
-    # blank. No special handling needed for real nulls — only for code values.
+    # `score` has genuine blank cells (rows N2, N4) which read as null.
+    # `scale` passes a null straight through: the output stays blank. No special
+    # handling needed for real nulls — only for code values.
     rules.add_rule(
         HarmonizationRule(
             sources=["score"],
             target="score_x10",
             transformation=[Scale(10)],
             metadata={
-                "rationale": "Genuine NaN passes through @handle_null unchanged; "
+                "rationale": "A genuine null passes through `scale` unchanged; "
                 "a blank input cell yields a blank output cell."
             },
         )
@@ -89,8 +88,8 @@ def build() -> RuleSet:
     # null just -999 (its default would null every reading), so we use
     # missing_code: it maps each declared code to a real null and passes every
     # other value through unchanged. missing_code runs FIRST (on the raw source),
-    # turning -999 into None; Scale (which is @handle_null) then passes the null
-    # through, so reading_kg is blank for N3 instead of corrupted. The code's
+    # turning -999 into None; `scale` then passes the null through, so
+    # reading_kg is blank for N3 instead of corrupted. The code's
     # label ("not_measured") is reported per-row to the replay log.
     rules.add_rule(
         HarmonizationRule(

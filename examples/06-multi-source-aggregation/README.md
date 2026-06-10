@@ -31,7 +31,8 @@ directly. Two things to know:
   downstream mapping keys.
 - **`reduce` rejects nulls** — a null element raises an error rather than being
   silently dropped, because a missing source is a data-quality signal.
-  Whole-column absence is handled separately by the CLI `--on-missing` policy.
+  Whole-column absence is handled separately by the CLI `--on-missing` policy
+  (see Example 07).
 
 ## The data
 
