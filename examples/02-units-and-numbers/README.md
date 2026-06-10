@@ -35,6 +35,29 @@ reason — converting at full precision before rounding for display, for instanc
 Subject `S3` has `oxygen_saturation = 101`, which `threshold(0, 100)` clamps to
 `100.0` in `spo2_clamped` — a visible, auditable correction.
 
+## Two distinctions worth drawing out
+
+Two of the choices above are easy to skim past but matter in practice.
+
+**Order within a pipeline is a decision, not an accident.** Two of these rules
+chain two operations, and in both the order is deliberate. `height_cm` converts
+inches to centimetres *first*, then rounds — because rounding the inches first
+and scaling up afterward would amplify the rounding error. `weight_kg` scales to
+kilograms first, then formats — because the scaling is the real computation and
+the formatting is only how the result is presented. The general principle:
+compute at full precision, and round or format for display **last**. A pipeline
+is an ordered list, so this ordering is recorded in the rule itself, not left to
+chance.
+
+**Rounding and formatting are not the same operation.** `round` produces a
+*number* with fewer decimals — `23.59` is still a float you could do arithmetic
+on. `format_number` produces a *string* pinned to a fixed number of decimals —
+`"23.59"` is a presentation contract, and a value like `23.6` would still render
+as `"23.60"`. Reach for `round` when downstream steps treat the value as a
+number; reach for `format_number` when the output is for display or export and
+the exact text matters. `weight_kg` uses `format_number` precisely because its
+job is to be a stable, exported string.
+
 ## The rules, serialized
 
 As in example 01, the saved file *is* the mapping, and the same rule set
