@@ -33,6 +33,24 @@ uses a malformed input to show the fail-fast behaviour.
 | `ordered_at` | `order_month` | `%Y-%m-%d %H:%M:%S` → `%b %Y` | Month-grain label (`Jan 2025`) for rollups, from the same column. |
 | `delivered_on` | `delivered_us` | `%Y-%m-%d` → `%m/%d/%Y` | US display format; source is date-only, so no time in the source format. |
 
+### How the format strings work
+
+Each `convert_date` takes two format strings: a `source_format` that says how to
+*read* the incoming value, and a `target_format` that says how to *write* it
+out. Both use Python's `strftime`/`strptime` codes, where each `%`-token stands
+for one part of a date or time — `%Y` is a four-digit year, `%m` a zero-padded
+month number, `%d` a zero-padded day, `%H:%M:%S` the time, and `%b` an
+abbreviated month name. So `%Y-%m-%d %H:%M:%S` reads `2025-01-05 09:30:00`, and
+`%b %Y` writes the same instant back out as `Jan 2025`. The literal characters
+between the tokens — the dashes, slashes, and spaces — are matched and emitted
+verbatim, which is why `%m/%d/%Y` produces the slash-separated US form.
+
+Two rules read the *same* column, `ordered_at`, with the same `source_format`
+but different `target_format`s, producing both a canonical `order_date` and a
+coarser `order_month` label from one source. The source format is a property of
+the input; the target format is a separate choice about how you want the result
+to look.
+
 ## Fail-fast is a feature
 
 `convert_date` does not try to be clever. Run it against `bad_input.csv` (a row
