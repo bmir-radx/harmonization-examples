@@ -1,7 +1,7 @@
 # 08 — Clinical Intake Showcase
 
-An end-to-end example that combines the primitives from the earlier tutorials on
-one input. Where each earlier example isolates a single idea, this one
+An end-to-end example that combines the primitives from the earlier chapters on
+one input. Where each earlier chapter isolates a single idea, this one
 harmonizes an intake CSV with several different problems at once — name
 reshaping, an out-of-vocabulary code, a date reformat, a unit conversion, and a
 multi-column consent reduction. The focus is on the **decisions**: when to fail
@@ -67,7 +67,7 @@ The integer index feeds `enum_to_enum` directly — no cast in between. The map 
 keyed by integers, and `EnumToEnum` serializes its mapping as a list of
 `{"from", "to"}` entries, so those integer keys keep their type through a
 `save()`/`load()` and match the index identically in-memory and from
-`rules.json`. (See example 05 for why the entry-list form matters: a JSON object
+`rules.json`. (See chapter 05 for why the entry-list form matters: a JSON object
 would have coerced the integer keys to strings and the index would have missed
 every key.)
 
@@ -79,7 +79,7 @@ every key.)
 
 ## The rules, serialized
 
-As in example 01, the saved file *is* the mapping, and the same rule set
+As in chapter 01, the saved file *is* the mapping, and the same rule set
 serializes to JSON (the default) or YAML — the extension decides which, and
 both load identically. Shown in both formats below.
 

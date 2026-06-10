@@ -58,7 +58,7 @@ cells: the framework already does the right thing.
 primitives `reduce` and `map_each` do *not* quietly skip a missing element;
 they raise an error instead. The reasoning is that a hole in the middle of a
 sum or an average is a data-quality problem you should know about, not something
-to paper over with a silent partial result. (Example 06 explores this in
+to paper over with a silent partial result. (Chapter 06 explores this in
 depth.)
 
 ## The data
@@ -130,7 +130,7 @@ identity-map every legitimate value of a continuous measurement. The
 identity-preserving null map `enum_to_enum` lacks. In `rules.json` it serializes
 as a list of `{"code", "label"}` entries — an entry-list, not a JSON object, so
 the numeric code keeps its type through a round-trip (the same reason
-`enum_to_enum` uses `{"from","to"}` entries; see example 05):
+`enum_to_enum` uses `{"from","to"}` entries; see chapter 05):
 
 ```
 "codes": [{"code": -999, "label": "not_measured"}]
@@ -177,7 +177,7 @@ and you want the rest of the harmonization to proceed regardless.
 
 ## The rules, serialized
 
-As in example 01, the saved file *is* the mapping, and the same rule set
+As in chapter 01, the saved file *is* the mapping, and the same rule set
 serializes to JSON (the default) or YAML — the extension decides which, and
 both load identically. Shown in both formats below.
 

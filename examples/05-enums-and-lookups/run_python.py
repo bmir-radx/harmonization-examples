@@ -1,5 +1,5 @@
 """
-Example 05 — run via the Python API and verify against the golden master.
+Chapter 05 — run via the Python API and verify against the golden master.
 
 See build_rules.py for the per-rule rationale. The Python `harmonize_file`
 output keeps all input columns plus the targets and metadata, which is what

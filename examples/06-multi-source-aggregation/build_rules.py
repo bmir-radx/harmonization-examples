@@ -1,5 +1,5 @@
 """
-Example 06 — Multi-source Aggregation (rule definitions / SOURCE OF TRUTH).
+Chapter 06 — Multi-source Aggregation (rule definitions / SOURCE OF TRUTH).
 
 Rules whose `sources` list has MORE THAN ONE column, collapsing several inputs
 into one target. Plus the single-column variant: a packed-array cell parsed and

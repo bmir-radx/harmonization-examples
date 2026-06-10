@@ -1,5 +1,5 @@
 """
-Example 08 — Clinical Intake Showcase: run via the Python API and verify.
+Chapter 08 — Clinical Intake Showcase: run via the Python API and verify.
 
 Harmonizes a realistic, messy intake CSV and asserts the result matches the
 pinned golden master. See build_rules.py for the per-rule rationale, including

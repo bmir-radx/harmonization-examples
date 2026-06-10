@@ -50,12 +50,12 @@ the cleaned result.
 
 `country_code` uses `truncate` to fake a country code. That's the *wrong* tool
 for an authoritative code system — `SW` for Sweden isn't ISO-3166 (`SE`).
-Authoritative code mapping belongs in an `enum_to_enum` lookup (example 05).
+Authoritative code mapping belongs in an `enum_to_enum` lookup (chapter 05).
 The example includes this on purpose so the contrast is explicit.
 
 ## The rules, serialized
 
-As in example 01, the saved file *is* the mapping, and the same rule set
+As in chapter 01, the saved file *is* the mapping, and the same rule set
 serializes to JSON (the default) or YAML — the extension decides which, and
 both load identically. Shown in both formats below.
 
@@ -138,7 +138,7 @@ sequence and the exact settings (which substitutions, what length limit).
       }
     ],
     "metadata": {
-      "rationale": "Crude 2-letter code via truncate+upper to demonstrate truncate. For authoritative codes use an enum_to_enum lookup instead (see example 05)."
+      "rationale": "Crude 2-letter code via truncate+upper to demonstrate truncate. For authoritative codes use an enum_to_enum lookup instead (see chapter 05)."
     }
   }
 ]
@@ -173,7 +173,7 @@ sequence and the exact settings (which substitutions, what length limit).
   - {operation: truncate, length: 2}
   - {operation: normalize_text, normalization: upper}
   metadata: {rationale: Crude 2-letter code via truncate+upper to demonstrate truncate.
-      For authoritative codes use an enum_to_enum lookup instead (see example 05).}
+      For authoritative codes use an enum_to_enum lookup instead (see chapter 05).}
 ```
 
 ## Running it

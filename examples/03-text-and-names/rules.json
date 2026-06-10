@@ -69,7 +69,7 @@
       }
     ],
     "metadata": {
-      "rationale": "Crude 2-letter code via truncate+upper to demonstrate truncate. For authoritative codes use an enum_to_enum lookup instead (see example 05)."
+      "rationale": "Crude 2-letter code via truncate+upper to demonstrate truncate. For authoritative codes use an enum_to_enum lookup instead (see chapter 05)."
     }
   }
 ]

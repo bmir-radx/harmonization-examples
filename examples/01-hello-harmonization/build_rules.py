@@ -1,8 +1,8 @@
 """
-Example 01 — Hello Harmonization (rule definitions / SOURCE OF TRUTH).
+Chapter 01 — Hello Harmonization (rule definitions / SOURCE OF TRUTH).
 
 This is the smallest possible end-to-end harmonization. It introduces the two
-ideas every later example builds on:
+ideas every later chapter builds on:
 
   1. A *rule* maps one or more SOURCE columns to a single TARGET column, by
      running the source value(s) through an ordered list of *primitive

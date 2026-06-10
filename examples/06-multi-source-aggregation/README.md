@@ -32,7 +32,7 @@ directly. Two things to know:
 - **`reduce` rejects nulls** — a null element raises an error rather than being
   silently dropped, because a missing source is a data-quality signal.
   Whole-column absence is handled separately by the CLI `--on-missing` policy
-  (see Example 07).
+  (see chapter 07).
 
 ## The data
 
@@ -70,7 +70,7 @@ malformed cell raises an error instead of yielding garbage.
 
 ## The rules, serialized
 
-As in example 01, the saved file *is* the mapping, and the same rule set
+As in chapter 01, the saved file *is* the mapping, and the same rule set
 serializes to JSON (the default) or YAML — the extension decides which, and
 both load identically. Shown in both formats below.
 

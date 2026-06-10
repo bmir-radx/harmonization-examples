@@ -1,5 +1,5 @@
 """
-Example 03 — Text & Names (rule definitions / SOURCE OF TRUTH).
+Chapter 03 — Text & Names (rule definitions / SOURCE OF TRUTH).
 
 Cleaning free-text fields is the most error-prone part of most harmonizations.
 The recurring lesson here: **extract/clean structure with `substitute` FIRST,
@@ -74,7 +74,7 @@ def build() -> RuleSet:
     # A deliberately crude 2-letter code: truncate to 2 chars, uppercase. This
     # is NOT ISO-3166 (Spain -> "SP", not "ES"); it's here to show `truncate`
     # composing with normalization. Real code mapping belongs in an
-    # enum_to_enum lookup (see example 05) — truncation is the wrong tool for
+    # enum_to_enum lookup (see chapter 05) — truncation is the wrong tool for
     # authoritative codes, and saying so is part of the lesson.
     rules.add_rule(
         HarmonizationRule(
@@ -87,7 +87,7 @@ def build() -> RuleSet:
             metadata={
                 "rationale": "Crude 2-letter code via truncate+upper to "
                 "demonstrate truncate. For authoritative codes use an "
-                "enum_to_enum lookup instead (see example 05)."
+                "enum_to_enum lookup instead (see chapter 05)."
             },
         )
     )

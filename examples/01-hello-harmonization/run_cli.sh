@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Example 01 — run via the harmonize CLI (no Python knowledge required).
+# Chapter 01 — run via the harmonize CLI (no Python knowledge required).
 #
 # The CLI consumes the SAME rules.json that build_rules.py produced. Unlike the
 # Python `harmonize_file` API, the CLI emits ONLY the target columns; pass

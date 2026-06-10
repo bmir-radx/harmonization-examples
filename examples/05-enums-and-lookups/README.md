@@ -70,12 +70,12 @@ A JSON *object* can only have string keys, so an object form would have turned
 `1` into `"1"` on save — and the integer input would then miss every key and
 fall through to the default. The entry-list keeps each key in a value position,
 so its type is preserved (`1` stays the integer `1`). No `cast(int→text)` is
-needed. (Examples 06 and 08 rely on the same property to feed a one-hot integer
+needed. (Chapters 06 and 08 rely on the same property to feed a one-hot integer
 index straight into `enum_to_enum`.)
 
 ## The rules, serialized
 
-As in example 01, the saved file *is* the mapping, and the same rule set
+As in chapter 01, the saved file *is* the mapping, and the same rule set
 serializes to JSON (the default) or YAML — the extension decides which, and
 both load identically. Shown in both formats below.
 

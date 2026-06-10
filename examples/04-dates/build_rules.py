@@ -1,5 +1,5 @@
 """
-Example 04 — Dates (rule definitions / SOURCE OF TRUTH).
+Chapter 04 — Dates (rule definitions / SOURCE OF TRUTH).
 
 Normalizing date/time fields to canonical formats with `convert_date`.
 

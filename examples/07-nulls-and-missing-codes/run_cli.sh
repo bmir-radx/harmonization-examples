@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Example 07 — run via the harmonize CLI. Same rules.json, target columns only.
+# Chapter 07 — run via the harmonize CLI. Same rules.json, target columns only.
 set -euo pipefail
 cd "$(dirname "$0")"
 

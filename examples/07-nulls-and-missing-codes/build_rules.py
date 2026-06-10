@@ -1,5 +1,5 @@
 """
-Example 07 — Nulls & Missing-Value Codes (rule definitions / SOURCE OF TRUTH).
+Chapter 07 — Nulls & Missing-Value Codes (rule definitions / SOURCE OF TRUTH).
 
 How the framework treats missing data, and how to handle the "fake nulls"
 (missing-value codes) that pollute real datasets.

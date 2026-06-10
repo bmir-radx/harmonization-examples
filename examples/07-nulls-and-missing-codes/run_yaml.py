@@ -1,5 +1,5 @@
 """
-Example 07 — Nulls & Missing-Value Codes — run via the Python API using the YAML rules, and verify the output.
+Chapter 07 — Nulls & Missing-Value Codes — run via the Python API using the YAML rules, and verify the output.
 
 Identical to run_python.py except it loads `rules.yaml` instead of `rules.json`.
 The framework picks the format from the file extension, so the YAML rules

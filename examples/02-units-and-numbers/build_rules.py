@@ -1,5 +1,5 @@
 """
-Example 02 — Units & Numbers (rule definitions / SOURCE OF TRUTH).
+Chapter 02 — Units & Numbers (rule definitions / SOURCE OF TRUTH).
 
 This example is about NUMERIC harmonization, and its real lesson is that
 **operation order matters**. Each rule below is an ordered pipeline; the same

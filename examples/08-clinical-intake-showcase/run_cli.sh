@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Example 08 — run via the harmonize CLI. Same rules.json, target columns only.
+# Chapter 08 — run via the harmonize CLI. Same rules.json, target columns only.
 #
 # Note --on-missing error: this intake has all expected source columns, so we
 # fail loudly if any are absent rather than silently skipping rules. Switch to
-# `warn` or `skip` to harmonize a partial file (see example 07).
+# `warn` or `skip` to harmonize a partial file (see chapter 07).
 set -euo pipefail
 cd "$(dirname "$0")"
 

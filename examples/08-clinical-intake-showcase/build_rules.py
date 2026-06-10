@@ -1,5 +1,5 @@
 """
-Example 08 — Clinical Intake Showcase (rule definitions / SOURCE OF TRUTH).
+Chapter 08 — Clinical Intake Showcase (rule definitions / SOURCE OF TRUTH).
 
 A deliberately realistic intake CSV with the messes you actually hit:
   - names stored as "Last, First" with inconsistent whitespace and casing,
@@ -8,7 +8,7 @@ A deliberately realistic intake CSV with the messes you actually hit:
   - height in inches,
   - consent captured as THREE separate one-hot flag columns.
 
-This example blends primitives from the tutorials and, more importantly,
+This example blends primitives from the earlier chapters and, more importantly,
 demonstrates the *harmonization decisions* that matter in practice: when to
 fail vs. coerce vs. default, how to resolve many-columns-to-one-column, and
 how to keep those decisions auditable via rule metadata.

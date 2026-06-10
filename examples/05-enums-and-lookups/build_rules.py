@@ -1,5 +1,5 @@
 """
-Example 05 — Enums & Lookups (rule definitions / SOURCE OF TRUTH).
+Chapter 05 — Enums & Lookups (rule definitions / SOURCE OF TRUTH).
 
 Mapping coded values to a target vocabulary, with two lessons:
 
@@ -9,7 +9,7 @@ Mapping coded values to a target vocabulary, with two lessons:
      map them to string labels. The serialized form is a list of {from, to}
      entries (not a JSON object), so the integer keys keep their type through a
      rules.json round-trip and match integer inputs directly — no Cast-to-text
-     dance required. (The same is true of the one-hot reduction in examples
+     dance required. (The same is true of the one-hot reduction in chapters
      06/08, which now feed their integer index straight into EnumToEnum.)
 
 Primitives: cast, enum_to_enum.

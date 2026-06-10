@@ -1,6 +1,6 @@
 # 01 — Hello Harmonization
 
-This is the first example. It introduces the framework's core model: two
+This is the first chapter. It introduces the framework's core model: two
 source columns are mapped to two target columns, run both through the Python
 API and the command-line tool. Later examples build on the pieces introduced
 here.
@@ -75,7 +75,7 @@ available:
 This example chooses **lenient** with `default="unknown"`. Real intake data
 drifts — a new status code shows up that nobody warned you about — and we'd
 rather surface that as a *visible* `"unknown"` than crash the whole batch or
-emit a blank cell that could mean several things. (Example 05 explores the
+emit a blank cell that could mean several things. (Chapter 05 explores the
 strict-vs-lenient trade-off in depth.)
 
 The reasoning for each rule is also recorded in its `metadata.rationale`, so it
