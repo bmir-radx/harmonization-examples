@@ -78,9 +78,7 @@ and the rules:
 
 Every example is also a **self-checking test**: its output is pinned to a
 committed **golden master** — an approved reference output the run is checked
-against — so the code you read here is code that is known to work. (The term
-comes from the "gold master" of audio and film production: the single approved
-copy everything else is measured against.)
+against — so the code you read here is code that is known to work.
 
 ## The core idea, in brief
 

@@ -1,8 +1,9 @@
 # 01 — Hello Harmonization
 
-The smallest complete example in the suite, and the place to meet the
-framework's core model: two source columns become two target columns, run two
-ways. Everything later builds on the pieces introduced here.
+This is the first example. It introduces the framework's core model: two
+source columns are mapped to two target columns, run both through the Python
+API and the command-line tool. Later examples build on the pieces introduced
+here.
 
 The model is small. You describe a mapping as a set of **rules**. Each rule
 takes one or more **source** columns and produces a single **target** column by
