@@ -8,6 +8,10 @@ examples/**/replay.log
 __pycache__/
 *.pyc
 
+# Docs site (mkdocs build output + docs venv)
+site/
+.venv-docs/
+
 # OS / editor
 .DS_Store
 .idea/

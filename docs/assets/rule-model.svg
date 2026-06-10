@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="470" viewBox="0 0 640 470" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <!-- hollow diamond for aggregation (at the whole end) -->
+    <marker id="diamond" viewBox="0 0 20 12" refX="1" refY="6" markerWidth="20" markerHeight="12" orient="auto">
+      <path d="M1,6 L10,1 L19,6 L10,11 z" fill="#ffffff" stroke="#475569" stroke-width="1.3"/>
+    </marker>
+    <!-- hollow triangle for generalization (inheritance) -->
+    <marker id="triangle" viewBox="0 0 16 16" refX="15" refY="8" markerWidth="16" markerHeight="16" orient="auto">
+      <path d="M1,1 L15,8 L1,15 z" fill="#ffffff" stroke="#475569" stroke-width="1.3"/>
+    </marker>
+    <style>
+      .box    { fill: #fffdf7; stroke: #94a3b8; stroke-width: 1.5; }
+      .hdr    { fill: #e8eef7; stroke: #94a3b8; stroke-width: 1.5; }
+      .cname  { font-size: 15px; font-weight: 700; fill: #0f172a; text-anchor: middle; }
+      .stereo { font-size: 11px; font-style: italic; fill: #64748b; text-anchor: middle; }
+      .assoc  { stroke: #475569; stroke-width: 1.4; fill: none; }
+      .mult   { font-size: 11px; fill: #334155; }
+      .role   { font-size: 11px; font-style: italic; fill: #64748b; }
+      .title  { font-size: 20px; font-weight: 700; fill: #0f172a; }
+    </style>
+  </defs>
+
+  <text x="24" y="34" class="title">The rule model</text>
+
+  <!-- RuleSet -->
+  <rect x="220" y="64" width="200" height="44" rx="3" class="hdr"/>
+  <text x="320" y="92" class="cname">RuleSet</text>
+
+  <!-- HarmonizationRule -->
+  <rect x="220" y="200" width="200" height="44" rx="3" class="hdr"/>
+  <text x="320" y="228" class="cname">HarmonizationRule</text>
+
+  <!-- PrimitiveOperation (abstract) -->
+  <rect x="220" y="340" width="200" height="54" rx="3" class="hdr"/>
+  <text x="320" y="362" class="stereo">&#171;abstract&#187;</text>
+  <text x="320" y="380" class="cname">PrimitiveOperation</text>
+
+  <!-- concrete primitives -->
+  <rect x="36" y="346" width="150" height="30" rx="3" class="box"/>
+  <text x="111" y="366" class="cname" font-size="13">DoNothing</text>
+  <rect x="36" y="386" width="150" height="30" rx="3" class="box"/>
+  <text x="111" y="406" class="cname" font-size="13">EnumToEnum</text>
+
+  <rect x="454" y="346" width="150" height="30" rx="3" class="box"/>
+  <text x="529" y="366" class="cname" font-size="13">ConvertUnits</text>
+  <rect x="454" y="386" width="150" height="30" rx="3" class="box"/>
+  <text x="529" y="406" class="cname" font-size="12.5">&#8230; (one per primitive)</text>
+
+  <!-- RuleSet aggregates HarmonizationRule -->
+  <line x1="320" y1="108" x2="320" y2="200" class="assoc" marker-start="url(#diamond)"/>
+  <text x="332" y="132" class="mult">1</text>
+  <text x="332" y="158" class="role">rules</text>
+  <text x="332" y="190" class="mult">0..*</text>
+
+  <!-- HarmonizationRule aggregates PrimitiveOperation (ordered) -->
+  <line x1="320" y1="244" x2="320" y2="340" class="assoc" marker-start="url(#diamond)"/>
+  <text x="332" y="268" class="mult">1</text>
+  <text x="332" y="296" class="role">transformation</text>
+  <text x="332" y="330" class="mult">0..*  {ordered}</text>
+
+  <!-- generalizations: concrete primitives inherit PrimitiveOperation -->
+  <!-- left tree: subclasses join a shared trunk at x=200; one triangle into the parent -->
+  <path d="M186 361 L200 361" class="assoc"/>
+  <path d="M186 401 L200 401" class="assoc"/>
+  <path d="M200 361 L200 401" class="assoc"/>
+  <path d="M200 367 L218 367" class="assoc" marker-end="url(#triangle)"/>
+  <!-- right tree, mirrored -->
+  <path d="M454 361 L440 361" class="assoc"/>
+  <path d="M454 401 L440 401" class="assoc"/>
+  <path d="M440 361 L440 401" class="assoc"/>
+  <path d="M440 367 L422 367" class="assoc" marker-end="url(#triangle)"/>
+</svg>

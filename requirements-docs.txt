@@ -1,0 +1,8 @@
+# Dependencies for building the documentation site (mkdocs).
+# Kept separate from the framework venv; install into a dedicated docs venv:
+#   python -m venv .venv-docs
+#   .venv-docs/bin/pip install -r requirements-docs.txt
+#   .venv-docs/bin/mkdocs serve
+mkdocs-material==9.5.39
+mkdocs-gen-files==0.5.0
+mkdocs-literate-nav==0.6.1

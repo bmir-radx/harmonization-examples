@@ -3,7 +3,7 @@ Shared golden-output verification helper for the harmonization examples.
 
 Every built example ships a known-good `expected_output.csv`. After an example
 runs, it calls `assert_matches(...)` to confirm the freshly produced CSV still
-equals the golden file. This turns each example into a self-checking regression
+equals the golden master. This turns each example into a self-checking regression
 test: if a future change to the framework alters behaviour, the example fails
 loudly instead of silently drifting.
 
@@ -12,7 +12,7 @@ Why compare as strings rather than as floats?
     rendered CSV cells exactly (after normalising blank/NA spelling) so the
     documented `expected_output.csv` is literally what the tool emits. Numeric
     rounding/formatting is therefore part of what each example demonstrates and
-    is pinned by the golden file.
+    is pinned by the golden master.
 """
 
 from __future__ import annotations
